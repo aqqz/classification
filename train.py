@@ -2,7 +2,6 @@ import tensorflow as tf
 import datetime
 import os
 import random
-from keras.layers import Conv2D, MaxPooling2D, Dense, Flatten
 from net.lenet5 import lenet5
 
 def load_image(image_path):
