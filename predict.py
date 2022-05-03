@@ -1,7 +1,6 @@
 import tensorflow as tf
 from train import load_image
 import time
-import tensorflow_hub as hub
 import os
 import matplotlib.pyplot as plt
 
@@ -14,9 +13,9 @@ if __name__ == '__main__':
     data_root = '/home/taozhi/archive/train' # 训练数据根目录
     class_names = os.listdir(data_root)
 
-    start = time.time()
-    net = tf.keras.models.load_model('model/model.h5', custom_objects={'KerasLayer': hub.KerasLayer})
+    net = tf.keras.models.load_model('model/model.h5')
     input = tf.expand_dims(load_image(test_image), 0)
+    start = time.time()
     output = tf.argmax(net.predict(input), axis=1)[0]
     end = time.time()
 

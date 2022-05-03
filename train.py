@@ -3,21 +3,12 @@ import datetime
 import os
 import random
 from keras.layers import Conv2D, MaxPooling2D, Dense, Flatten
-
-def is_image(filename, verbose=False):
-    data = open(filename,'rb').read(10)
-    # check if file is JPG or JPEG
-    if data[:3] == b'\xff\xd8\xff':
-        if verbose == True:
-             print(filename+" is: JPG/JPEG.")
-        return True
-    return False
-
+from net.lenet5 import lenet5
 
 def load_image(image_path):
     raw = tf.io.read_file(image_path)
     img = tf.io.decode_jpeg(raw, channels=1)
-    img = tf.image.resize(img, [244, 324])
+    img = tf.image.resize(img, [28, 28])
     img = tf.cast(img, tf.float32)
     img /= 255.0
     return img
@@ -25,21 +16,6 @@ def load_image(image_path):
 
 def to_one_hot(image_label):
     return tf.one_hot(image_label, len(class_names))
-
-
-def make_model(num_classes):
-    return tf.keras.Sequential([
-        tf.keras.Input((244, 324, 1)),
-        tf.keras.layers.experimental.preprocessing.Resizing(
-            224, 224, interpolation="bilinear"
-        ),
-        Conv2D(32, (3, 3), strides=(2, 2), activation="relu", input_shape=(224, 224, 1)),
-        MaxPooling2D(pool_size=(2, 2)),
-        Conv2D(64, (3, 3), activation="relu"),
-        MaxPooling2D(pool_size=(2, 2)),
-        Flatten(),
-        Dense(num_classes, activation="softmax")       
-    ])
 
 
 def genearte_image_list(data_root):
@@ -52,11 +28,6 @@ def genearte_image_list(data_root):
         for file in files:
             # 过滤不是.jpg后缀文件
             if file.endswith('.jpg'):
-                # 过滤不是JPEG格式的图片
-                if is_image(os.path.join(class_dir, file), verbose=False) == False:
-                    os.remove(os.path.join(class_dir, file))
-                    continue
-
                 image_path = os.path.join(class_dir, file)
                 image_label = class_names.index(class_dir[len(data_root)+1:])
                 image_paths.append(image_path)
@@ -95,7 +66,7 @@ def train(train_ds, val_ds, EPOCHS, BATCH_SIZE=32):
     train_ds = train_ds.shuffle(train_ds.cardinality().numpy()).batch(BATCH_SIZE)
     val_ds = val_ds.batch(BATCH_SIZE)
 
-    model = make_model(num_classes=len(class_names))
+    model = lenet5(num_classes=len(class_names), input_shape=(28, 28, 1))
     model.summary()
     # 训练配置
     loss = tf.keras.losses.CategoricalCrossentropy()
@@ -145,18 +116,21 @@ def train(train_ds, val_ds, EPOCHS, BATCH_SIZE=32):
             tf.summary.scalar('loss', val_loss.result(), step=epoch)
             tf.summary.scalar('accuracy', val_accuracy.result(), step=epoch)
         
+        pattern = '{:.3f}'
         print(
-            f'Epoch {epoch + 1}, '
-            f'Loss: {train_loss.result()}, '
-            f'Accuracy: {train_accuracy.result()}, '
-            f'Val Loss: {val_loss.result()}, '
-            f'Val Accuracy: {val_accuracy.result()}'
+            'Epoch ' + '{}'.format(epoch+1),
+            'Loss: ' + pattern.format(train_loss.result()),
+            'Accuracy: ' + pattern.format(train_accuracy.result()),
+            'Val Loss: ' + pattern.format(val_loss.result()), 
+            'Val Accuracy: ' + pattern.format(val_accuracy.result())
         )
         
         train_loss.reset_states()
         train_accuracy.reset_states()
         val_loss.reset_states()
         val_accuracy.reset_states()
+    
+    model.save("model/model.h5")
 
 
 if __name__ == '__main__':
