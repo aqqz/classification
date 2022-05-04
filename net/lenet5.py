@@ -1,13 +1,14 @@
 import tensorflow as tf
 from keras.layers import Conv2D, MaxPooling2D, Flatten, Dense
 
-def lenet5(num_classes, input_shape):
-    return tf.keras.Sequential([
-        Conv2D(20, (5, 5), padding="same", input_shape=input_shape, activation="relu"),
-        MaxPooling2D(2, 2), 
-        Conv2D(50, (5, 5), padding="same", activation="relu"),
-        MaxPooling2D(2, 2),
+# 使用functional API
+def lenet5(num_classes):
+     return tf.keras.Sequential([
+        Conv2D(32, (3, 3), activation="relu", input_shape=(224, 224, 3)),
+        MaxPooling2D(pool_size=(2, 2)),
+        Conv2D(64, (3, 3), activation="relu"),
+        MaxPooling2D(pool_size=(2, 2)),
         Flatten(),
-        Dense(500, activation="relu"),
-        Dense(num_classes, activation="softmax")
+        Dense(num_classes, activation="softmax")       
     ])
+    

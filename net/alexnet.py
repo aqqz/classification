@@ -1,10 +1,10 @@
 import tensorflow as tf
 from keras.layers import Conv2D, MaxPooling2D, Dense, Flatten, Dropout, BatchNormalization, ReLU, Softmax
 
-def AlexNet(num_classes, input_shape):
+def AlexNet(num_classes):
     return tf.keras.Sequential([
         # 卷积，批量归一化，激活
-        Conv2D(96, (11, 11), strides=4, input_shape=input_shape, name="conv1"),
+        Conv2D(96, (11, 11), strides=4, input_shape=(227, 227, 3), name="conv1"),
         BatchNormalization(name="bn1"), # 增加bn层有利于梯度下降
         ReLU(name="relu1"),
         MaxPooling2D(3, strides=2, name="pool1"),

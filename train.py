@@ -2,12 +2,13 @@ import tensorflow as tf
 import datetime
 import os
 import random
+from net.alexnet import AlexNet
 from net.lenet5 import lenet5
 
 def load_image(image_path):
     raw = tf.io.read_file(image_path)
-    img = tf.io.decode_jpeg(raw, channels=1)
-    img = tf.image.resize(img, [28, 28])
+    img = tf.io.decode_jpeg(raw, channels=3)
+    img = tf.image.resize(img, [227, 227])
     img = tf.cast(img, tf.float32)
     img /= 255.0
     return img
@@ -65,11 +66,12 @@ def train(train_ds, val_ds, EPOCHS, BATCH_SIZE=32):
     train_ds = train_ds.shuffle(train_ds.cardinality().numpy()).batch(BATCH_SIZE)
     val_ds = val_ds.batch(BATCH_SIZE)
 
-    model = lenet5(num_classes=len(class_names), input_shape=(28, 28, 1))
+    model = AlexNet(num_classes=len(class_names))
     model.summary()
     # 训练配置
     loss = tf.keras.losses.CategoricalCrossentropy()
-    optimizer = tf.keras.optimizers.Adam()
+    optimizer = tf.keras.optimizers.Adam(learning_rate=1e-4)
+    
     # 记录指标
     train_loss = tf.keras.metrics.Mean(name="train_loss")
     train_accuracy = tf.keras.metrics.CategoricalAccuracy(name="train_acc")
@@ -86,7 +88,7 @@ def train(train_ds, val_ds, EPOCHS, BATCH_SIZE=32):
     @tf.function
     def train_step(images, labels):
         with tf.GradientTape() as tape:
-            logits = model(images)
+            logits = model(images, training=True)
             loss_value = loss(labels, logits)
         gradients = tape.gradient(loss_value, model.trainable_variables)
         optimizer.apply_gradients(zip(gradients, model.trainable_variables))
@@ -96,45 +98,60 @@ def train(train_ds, val_ds, EPOCHS, BATCH_SIZE=32):
     # 验证阶段
     @tf.function
     def val_step(images, labels):
-        logits = model(images)
+        logits = model(images, training=False)
         loss_value = loss(labels, logits)
         val_loss(loss_value)
         val_accuracy(labels, logits)
+        
     
     # 训练循环
     for epoch in range(EPOCHS):
-        for images, labels in train_ds:
+        for step, (images, labels) in enumerate(train_ds):
             train_step(images, labels)
+
         with train_summary_writer.as_default():
             tf.summary.scalar('loss', train_loss.result(), step=epoch)
             tf.summary.scalar('accuracy', train_accuracy.result(), step=epoch)
-        
-        for images, labels in val_ds:
-            val_step(images, labels)
-        with val_summary_writer.as_default():
-            tf.summary.scalar('loss', val_loss.result(), step=epoch)
-            tf.summary.scalar('accuracy', val_accuracy.result(), step=epoch)
         
         pattern = '{:.3f}'
         print(
             'Epoch ' + '{}'.format(epoch+1),
             'Loss: ' + pattern.format(train_loss.result()),
             'Accuracy: ' + pattern.format(train_accuracy.result()),
+            end=', '
+        )
+        train_loss.reset_states()
+        train_accuracy.reset_states()
+
+        
+        for step, (images, labels) in enumerate(val_ds):
+            val_step(images, labels)
+
+        with val_summary_writer.as_default():
+            tf.summary.scalar('loss', val_loss.result(), step=epoch)
+            tf.summary.scalar('accuracy', val_accuracy.result(), step=epoch)
+
+        print(
             'Val Loss: ' + pattern.format(val_loss.result()), 
             'Val Accuracy: ' + pattern.format(val_accuracy.result())
         )
-        
-        train_loss.reset_states()
-        train_accuracy.reset_states()
         val_loss.reset_states()
         val_accuracy.reset_states()
+
+
+    # model.compile(
+    #     loss="categorical_crossentropy",
+    #     optimizer="adam",
+    #     metrics=['accuracy']
+    # )
+    # model.fit(train_ds, validation_data=val_ds, epochs=EPOCHS)
     
     model.save("model/model.h5")
 
 
 if __name__ == '__main__':
 
-    data_root = '/home/taozhi/archive/train' # 训练数据根目录
+    data_root = '/home/taozhi/datasets/dogs_vs_cats/train' # 训练数据根目录
     print(data_root)
     class_names = os.listdir(data_root)
     print(class_names)
@@ -143,6 +160,6 @@ if __name__ == '__main__':
 
     train_ds, val_ds = generate_split_dataset(image_paths, image_labels, split_rate=0.7)
 
-    train(train_ds, val_ds, EPOCHS=10, BATCH_SIZE=32)
+    train(train_ds, val_ds, EPOCHS=20, BATCH_SIZE=32)
 
     
