@@ -4,11 +4,12 @@ import os
 import random
 from net.alexnet import AlexNet
 from net.lenet5 import lenet5
+from net.vggnet import vggnet
 
 def load_image(image_path):
     raw = tf.io.read_file(image_path)
     img = tf.io.decode_jpeg(raw, channels=3)
-    img = tf.image.resize(img, [227, 227])
+    img = tf.image.resize(img, [224, 224])
     img = tf.cast(img, tf.float32)
     img /= 255.0
     return img
@@ -66,7 +67,10 @@ def train(train_ds, val_ds, EPOCHS, BATCH_SIZE=32):
     train_ds = train_ds.shuffle(train_ds.cardinality().numpy()).batch(BATCH_SIZE)
     val_ds = val_ds.batch(BATCH_SIZE)
 
-    model = AlexNet(num_classes=len(class_names))
+    input = tf.keras.layers.Input(shape=(224, 224, 3))
+    output = vggnet(input, num_classes=len(class_names))
+    model = tf.keras.Model(input, output)
+
     model.summary()
     # 训练配置
     loss = tf.keras.losses.CategoricalCrossentropy()
