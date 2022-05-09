@@ -5,6 +5,7 @@ import random
 from net.alexnet import AlexNet
 from net.lenet5 import lenet5
 from net.vggnet import vggnet
+from net.googlenet import googlenet
 
 def load_image(image_path):
     raw = tf.io.read_file(image_path)
@@ -69,7 +70,7 @@ def train(train_ds, val_ds, EPOCHS, BATCH_SIZE=32):
 
     # 构建模型
     input = tf.keras.layers.Input(shape=(224, 224, 3))
-    output = vggnet(input, num_classes=len(class_names))
+    output = googlenet(input, num_classes=len(class_names))
     model = tf.keras.Model(input, output)
 
     model.summary()
