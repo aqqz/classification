@@ -6,6 +6,7 @@ from net.alexnet import AlexNet
 from net.lenet5 import lenet5
 from net.vggnet import vggnet
 from net.googlenet import googlenet
+from net.resnet import resnet
 
 def load_image(image_path):
     raw = tf.io.read_file(image_path)
@@ -70,7 +71,7 @@ def train(train_ds, val_ds, EPOCHS, BATCH_SIZE=32):
 
     # 构建模型
     input = tf.keras.layers.Input(shape=(224, 224, 3))
-    output = googlenet(input, num_classes=len(class_names))
+    output = resnet(input, num_classes=len(class_names))
     model = tf.keras.Model(input, output)
 
     model.summary()
@@ -168,6 +169,6 @@ if __name__ == '__main__':
 
     train_ds, val_ds = generate_split_dataset(image_paths, image_labels, split_rate=0.8)
 
-    train(train_ds, val_ds, EPOCHS=20, BATCH_SIZE=32)
+    train(train_ds, val_ds, EPOCHS=50, BATCH_SIZE=32)
 
     

@@ -22,6 +22,7 @@ out_channels3reduce, out_channels3, out_channels4):
 
 
 def googlenet(input, num_classes):
+    # input_shape (224, 224, 3)
     x = Conv2D(64, (7, 7), strides=2, padding="same")(input) #padding=same 保证输出特征图维度不变，仅受步距影响
     x = BatchNormalization()(x)
     x = ReLU()(x)
