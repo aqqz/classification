@@ -1,4 +1,4 @@
 model/
 runs/
 net/__pycache__/
-__pycache__/
+__pycache__/*

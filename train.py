@@ -158,7 +158,7 @@ def train(train_ds, val_ds, EPOCHS, BATCH_SIZE=32):
 
 if __name__ == '__main__':
 
-    data_root = '/home/taozhi/datasets/dogs_vs_cats/train' # 训练数据根目录
+    data_root = '/home/taozhi/datasets/face2' # 训练数据根目录
     print(data_root)
     class_names = os.listdir(data_root)
     print(class_names)
