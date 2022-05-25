@@ -115,35 +115,32 @@ def train(train_ds, val_ds, EPOCHS, BATCH_SIZE=32):
     
     # 训练循环
     for epoch in range(EPOCHS):
-        for step, (images, labels) in enumerate(train_ds):
-            train_step(images, labels)
-
         with train_summary_writer.as_default():
             tf.summary.scalar('loss', train_loss.result(), step=epoch)
             tf.summary.scalar('accuracy', train_accuracy.result(), step=epoch)
+            
+        with val_summary_writer.as_default():
+            tf.summary.scalar('loss', val_loss.result(), step=epoch)
+            tf.summary.scalar('accuracy', val_accuracy.result(), step=epoch)
+
+        for step, (images, labels) in enumerate(train_ds):
+            train_step(images, labels)
+
+        for step, (images, labels) in enumerate(val_ds):
+            val_step(images, labels)
+        
         
         pattern = '{:.3f}'
         print(
             'Epoch ' + '{}'.format(epoch+1),
             'Loss: ' + pattern.format(train_loss.result()),
             'Accuracy: ' + pattern.format(train_accuracy.result()),
-            end=', '
-        )
-        train_loss.reset_states()
-        train_accuracy.reset_states()
-
-        
-        for step, (images, labels) in enumerate(val_ds):
-            val_step(images, labels)
-
-        with val_summary_writer.as_default():
-            tf.summary.scalar('loss', val_loss.result(), step=epoch)
-            tf.summary.scalar('accuracy', val_accuracy.result(), step=epoch)
-
-        print(
             'Val Loss: ' + pattern.format(val_loss.result()), 
             'Val Accuracy: ' + pattern.format(val_accuracy.result())
         )
+        
+        train_loss.reset_states()
+        train_accuracy.reset_states()
         val_loss.reset_states()
         val_accuracy.reset_states()
 

@@ -1,4 +1,3 @@
-from uuid import RESERVED_FUTURE
 import tensorflow as tf
 from keras.layers import Conv2D, MaxPooling2D, Flatten, Dense, \
     BatchNormalization, ReLU, Concatenate, Dropout, AveragePooling2D
