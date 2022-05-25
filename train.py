@@ -10,7 +10,7 @@ from net.resnet import resnet
 
 def load_image(image_path):
     raw = tf.io.read_file(image_path)
-    img = tf.io.decode_jpeg(raw, channels=3)
+    img = tf.io.decode_jpeg(raw, channels=1)
     img = tf.image.resize(img, [224, 224])
     img = tf.cast(img, tf.float32)
     img /= 255.0
@@ -70,9 +70,10 @@ def train(train_ds, val_ds, EPOCHS, BATCH_SIZE=32):
     val_ds = val_ds.batch(BATCH_SIZE)
 
     # 构建模型
-    input = tf.keras.layers.Input(shape=(224, 224, 3))
-    output = resnet(input, num_classes=len(class_names))
-    model = tf.keras.Model(input, output)
+    # input = tf.keras.layers.Input(shape=(224, 224, 3))
+    # output = resnet(input, num_classes=len(class_names))
+    # model = tf.keras.Model(input, output)
+    model = lenet5(len(class_names))
 
     model.summary()
     # 训练配置
@@ -157,7 +158,7 @@ def train(train_ds, val_ds, EPOCHS, BATCH_SIZE=32):
 
 if __name__ == '__main__':
 
-    data_root = '/home/taozhi/datasets/flowers' # 训练数据根目录
+    data_root = '/home/taozhi/datasets/face2' # 训练数据根目录
     print(data_root)
     class_names = os.listdir(data_root)
     print(class_names)
