@@ -9,8 +9,8 @@ os.environ["CUDA_VISIBLE_DEVICES"] = "-1"
 
 if __name__ == '__main__':
 
-    test_image = 'test/dog.jpeg'
-    data_root = '/home/taozhi/datasets/face2' # 训练数据根目录
+    test_image = 'test/cat.jpg'
+    data_root = '/home/taozhi/datasets/dogs_vs_cats/train' # 训练数据根目录
     class_names = os.listdir(data_root)
 
     net = tf.keras.models.load_model('model/model.h5')
