@@ -9,16 +9,17 @@ os.environ["CUDA_VISIBLE_DEVICES"] = "-1"
 
 if __name__ == '__main__':
 
-    test_image = '/home/taozhi/archive/test/117196494.jpg'
-    data_root = '/home/taozhi/archive/train' # 训练数据根目录
+    test_image = '/home/taozhi/datasets/dogs_vs_cats/test/dogs/dog.4716.jpg'
+    data_root = '/home/taozhi/datasets/dogs_vs_cats/train' # 训练数据根目录
     class_names = os.listdir(data_root)
 
     net = tf.keras.models.load_model('model/model.h5')
     input = tf.expand_dims(load_image(test_image), 0)
     start = time.time()
-    output = tf.argmax(net.predict(input), axis=1)[0]
+    res = net.predict(input)
+    output = tf.argmax(res, axis=1)[0]
     end = time.time()
-
+    print(res)
     print(f"class: {output}, result: {class_names[output]}, time: {end-start}")
     plt.imshow(load_image(test_image))
     plt.show()
