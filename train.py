@@ -17,11 +17,11 @@ def load_image(image_path):
     return img
 
 
-def to_one_hot(image_label):
+def to_one_hot(image_label, class_names):
     return tf.one_hot(image_label, len(class_names))
 
 
-def genearte_image_list(data_root):
+def genearte_image_list(data_root, class_names):
     class_dirs = [os.path.join(data_root, class_name) for class_name in class_names]
     
     image_paths = []
@@ -47,7 +47,7 @@ def genearte_image_list(data_root):
 
 def generate_split_dataset(image_paths, image_labels, split_rate=0.8):
     image_dataset = tf.data.Dataset.from_tensor_slices(image_paths).map(load_image)
-    label_dataset = tf.data.Dataset.from_tensor_slices(image_labels).map(to_one_hot)
+    label_dataset = tf.data.Dataset.from_tensor_slices(image_labels).map(lambda x: to_one_hot(x, class_names))
     dataset = tf.data.Dataset.zip((image_dataset, label_dataset))
     
     # 划分数据集
@@ -64,7 +64,7 @@ def generate_split_dataset(image_paths, image_labels, split_rate=0.8):
     return train_dataset, val_dataset
 
 
-def train(train_ds, val_ds, EPOCHS, BATCH_SIZE=32):
+def train(train_ds, val_ds, EPOCHS, BATCH_SIZE=32, lr=0.01, save_path='model/model.h5'):
     
     train_ds = train_ds.shuffle(train_ds.cardinality().numpy()).batch(BATCH_SIZE)
     val_ds = val_ds.batch(BATCH_SIZE)
@@ -78,7 +78,7 @@ def train(train_ds, val_ds, EPOCHS, BATCH_SIZE=32):
     model.summary()
     # 训练配置
     loss = tf.keras.losses.CategoricalCrossentropy()
-    optimizer = tf.keras.optimizers.SGD(learning_rate=0.01)
+    optimizer = tf.keras.optimizers.SGD(learning_rate=lr)
     
     # 记录指标
     train_loss = tf.keras.metrics.Mean(name="train_loss")
@@ -153,20 +153,20 @@ def train(train_ds, val_ds, EPOCHS, BATCH_SIZE=32):
     # )
     # model.fit(train_ds, validation_data=val_ds, epochs=EPOCHS)
     
-    model.save("model/model.h5")
+    model.save(save_path)
 
 
 if __name__ == '__main__':
 
-    data_root = '/home/taozhi/datasets/dogs_vs_cats/train' # 训练数据根目录
+    data_root = '/home/taozhi/datasets/FaceDB/face2' # 训练数据根目录
     print(data_root)
     class_names = os.listdir(data_root)
     print(class_names)
 
-    image_paths, image_labels = genearte_image_list(data_root)
+    image_paths, image_labels = genearte_image_list(data_root, class_names)
 
     train_ds, val_ds = generate_split_dataset(image_paths, image_labels, split_rate=0.8)
 
-    train(train_ds, val_ds, EPOCHS=50, BATCH_SIZE=32)
+    train(train_ds, val_ds, EPOCHS=5, BATCH_SIZE=32, lr=0.01, save_path='model/model.h5')
 
     

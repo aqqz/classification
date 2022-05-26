@@ -1,5 +1,5 @@
 import tensorflow as tf
-from keras.layers import Conv2D, MaxPooling2D, Flatten, Dense
+from keras.layers import Conv2D, MaxPooling2D, Flatten, Dense, Dropout
 
 # 使用functional API
 def lenet5(num_classes):
@@ -9,6 +9,7 @@ def lenet5(num_classes):
         Conv2D(64, (3, 3), padding="same", activation="relu"),
         MaxPooling2D(pool_size=(2, 2)),
         Flatten(),
+        Dropout(0.5),
         Dense(num_classes, activation="softmax")       
     ])
     
