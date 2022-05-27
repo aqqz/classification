@@ -3,6 +3,7 @@ import datetime
 import os
 from net.lenet5 import lenet5
 from net.googlenet import googlenet
+from net.alexnet import alexnet
 from utils import *
 from loss import loss
 

@@ -36,5 +36,5 @@ def alexnet(input, num_classes):
     x = ReLU()(x)
     x = Dropout(rate=0.5)(x)
 
-    x = Dense(num_classes, activation="softmax")
+    x = Dense(num_classes, activation="softmax")(x)
     return x
