@@ -1,10 +1,11 @@
 import tensorflow as tf
 import os
 import random
+import numpy as np
 
 def load_image(image_path):
     raw = tf.io.read_file(image_path)
-    img = tf.io.decode_jpeg(raw, channels=3)
+    img = tf.io.decode_jpeg(raw, channels=1)
     img = tf.image.resize(img, [224, 224])
     img = tf.cast(img, tf.float32)
     img /= 255
@@ -37,6 +38,23 @@ def genearte_image_list(data_root, class_names):
     random.shuffle(image_labels)
         
     return image_paths, image_labels
+
+
+def load_data(image_paths, image_labels):
+    test_images = []
+    test_labels = []
+
+    for path in image_paths:
+        test_images.append(load_image(path))
+
+    for label in image_labels:
+        test_labels.append(label)
+
+    test_images = np.array(test_images)
+    test_labels = np.array(test_labels)
+
+    return test_images, test_labels
+
 
 
 def generate_split_dataset(image_paths, image_labels, class_names, split_rate=0.8):

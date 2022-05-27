@@ -1,19 +1,10 @@
-from voc_datagen import generate_dataset, generate_voc_image_label_list
+from voc_datagen import *
 import sys
 sys.path.append('.')
 
 import train
 
-voc_label_path = '/home/taozhi/datasets/VOCdevkit/VOC2007/ImageSets/Main'
-voc_image_path = '/home/taozhi/datasets/VOCdevkit/VOC2007/JPEGImages'
-voc_annotation_path = '/home/taozhi/datasets/VOCdevkit/VOC2007/Annotations'
 
-voc_class_list = [
-    'aeroplane', 'bicycle', 'bird', 'boat', 'bottle',
-    'bus', 'car', 'cat', 'chair', 'cow',
-    'diningtable', 'dog', 'horse', 'motorbike', 'person',
-    'pottedplant', 'sheep', 'sofa', 'train', 'tvmonitor'
-]
 
 if __name__ == '__main__':
 

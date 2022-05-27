@@ -6,6 +6,17 @@ import sys
 sys.path.append('.')
 import utils
 
+voc_label_path = '/home/taozhi/datasets/VOCdevkit/VOC2007/ImageSets/Main'
+voc_image_path = '/home/taozhi/datasets/VOCdevkit/VOC2007/JPEGImages'
+voc_annotation_path = '/home/taozhi/datasets/VOCdevkit/VOC2007/Annotations'
+
+voc_class_list = [
+    'aeroplane', 'bicycle', 'bird', 'boat', 'bottle',
+    'bus', 'car', 'cat', 'chair', 'cow',
+    'diningtable', 'dog', 'horse', 'motorbike', 'person',
+    'pottedplant', 'sheep', 'sofa', 'train', 'tvmonitor'
+]
+
 def generate_voc_image_label_list(cls, voc_label_path, voc_image_path, mode="train"):    
     img_paths = []
     img_labels = []
