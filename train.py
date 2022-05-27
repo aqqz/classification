@@ -13,9 +13,10 @@ def train(train_ds, val_ds, EPOCHS, BATCH_SIZE=32, lr=0.01, save_path='model/mod
     train_ds = train_ds.shuffle(train_ds.cardinality().numpy()).batch(BATCH_SIZE)
     val_ds = val_ds.batch(BATCH_SIZE)
 
+    num_classes = train_ds.element_spec[1].shape[1]
     # 构建模型
     input = tf.keras.layers.Input(shape=(224, 224, 3))
-    output = lenet5(input, len(class_names))
+    output = googlenet(input, num_classes)
     model = tf.keras.Model(input, output)
 
     model.summary()
