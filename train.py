@@ -7,6 +7,7 @@ from net.alexnet import alexnet
 from utils import *
 from loss import loss
 
+os.environ["CUDA_VISIBLE_DEVICES"] = "-1"
 
 def train(train_ds, val_ds, EPOCHS, BATCH_SIZE=32, lr=0.01, save_path='model/model.h5'):
     
@@ -16,7 +17,7 @@ def train(train_ds, val_ds, EPOCHS, BATCH_SIZE=32, lr=0.01, save_path='model/mod
     num_classes = train_ds.element_spec[1].shape[1]
     # 构建模型
     input = tf.keras.layers.Input(shape=(224, 224, 3))
-    output = googlenet(input, num_classes)
+    output = lenet5(input, num_classes)
     model = tf.keras.Model(input, output)
 
     model.summary()
@@ -94,7 +95,7 @@ def train(train_ds, val_ds, EPOCHS, BATCH_SIZE=32, lr=0.01, save_path='model/mod
 
 if __name__ == '__main__':
 
-    data_root = '/home/taozhi/datasets/dogs_vs_cats/train' # 训练数据根目录
+    data_root = '/home/taozhi/datasets/flowers' # 训练数据根目录
     print(data_root)
     class_names = os.listdir(data_root)
     print(class_names)

@@ -52,8 +52,10 @@ def generate_voc_image_label_list(cls, voc_label_path, voc_image_path, mode="tra
 
 def generate_dataset(image_paths, image_labels):
 
-    image_dataset = tf.data.Dataset.from_tensor_slices(image_paths).map(utils.load_image)
-    label_dataset = tf.data.Dataset.from_tensor_slices(image_labels).map(lambda x: tf.one_hot(x, 2))
+    image_dataset = tf.data.Dataset.from_tensor_slices(image_paths).map(
+        lambda x: utils.load_image(x, normalization=True, channels=3))
+    label_dataset = tf.data.Dataset.from_tensor_slices(image_labels).map(
+        lambda x: tf.one_hot(x, 2))
     dataset = tf.data.Dataset.zip((image_dataset, label_dataset))
 
     return dataset

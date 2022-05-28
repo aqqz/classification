@@ -4,6 +4,7 @@ from utils import load_data
 import numpy as np
 import time
 
+os.environ["CUDA_VISIBLE_DEVICES"] = "-1"
 
 def lite_convert(model_path, quantization="none", save_path="model/model.tflite", image_list=[], count=100):
 
@@ -41,7 +42,7 @@ def evaluate_tflite(model_path, test_images, test_labels):
 
     input_details = interpreter.get_input_details()[0]
     output_details = interpreter.get_output_details()[0]
-    
+
     count = 0
     accuracy = tf.keras.metrics.Accuracy()
     # 检查是否是量化模型
@@ -77,7 +78,7 @@ if __name__ == '__main__':
     test_img_paths, test_img_labels = generate_voc_image_label_list(cls="person", \
         voc_label_path=voc_label_path, voc_image_path=voc_image_path, mode="val")
     
-    test_images, test_labels = load_data(test_img_paths, test_img_labels)
+    test_images, test_labels = load_data(test_img_paths, test_img_labels, int_quantize=True)
 
     # lite_convert('model/voc.h5', quantization="none", save_path="model/voc.tflite", \
     #     image_list=test_images, count=100)

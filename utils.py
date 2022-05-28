@@ -3,12 +3,14 @@ import os
 import random
 import numpy as np
 
-def load_image(image_path):
+def load_image(image_path, normalization=True, channels=1):
     raw = tf.io.read_file(image_path)
-    img = tf.io.decode_jpeg(raw, channels=1)
+    img = tf.io.decode_jpeg(raw, channels=channels)
     img = tf.image.resize(img, [224, 224])
     img = tf.cast(img, tf.float32)
-    img /= 255
+    if normalization==True:
+        img = img / 255
+
     return img
 
 
@@ -40,13 +42,13 @@ def genearte_image_list(data_root, class_names):
     return image_paths, image_labels
 
 
-def load_data(image_paths, image_labels):
+def load_data(image_paths, image_labels, int_quantize=False):
     test_images = []
     test_labels = []
     print("loading data...\n")
     
     for path in image_paths:
-        test_images.append(load_image(path))
+        test_images.append(load_image(path, normalization=not int_quantize, channels=1))
 
     for label in image_labels:
         test_labels.append(label)
@@ -59,8 +61,10 @@ def load_data(image_paths, image_labels):
 
 
 def generate_split_dataset(image_paths, image_labels, class_names, split_rate=0.8):
-    image_dataset = tf.data.Dataset.from_tensor_slices(image_paths).map(load_image)
-    label_dataset = tf.data.Dataset.from_tensor_slices(image_labels).map(lambda x: to_one_hot(x, class_names))
+    image_dataset = tf.data.Dataset.from_tensor_slices(image_paths).map(
+        lambda x: load_image(x, normalization=True, channels=3))
+    label_dataset = tf.data.Dataset.from_tensor_slices(image_labels).map(
+        lambda x: to_one_hot(x, class_names))
     dataset = tf.data.Dataset.zip((image_dataset, label_dataset))
     
     # 划分数据集
