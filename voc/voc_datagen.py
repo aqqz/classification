@@ -22,7 +22,7 @@ def generate_voc_image_label_list(cls, voc_label_path, voc_image_path, mode="tra
     img_labels = []
     
     label_path = os.path.join(voc_label_path, cls + '_' + mode + '.txt')
-    print("reading..." + label_path)
+    print("reading..." + label_path + "\n")
     
     # read txt
     f = open(label_path, "r")

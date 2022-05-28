@@ -21,7 +21,7 @@ if __name__ == '__main__':
     train_ds = generate_dataset(train_img_paths, train_img_labels)
     val_ds = generate_dataset(val_img_paths, val_img_labels)
 
-    print("training on {} examples, validating on {} examples".format( \
+    print("training on {} examples, validating on {} examples\n".format( \
         train_ds.cardinality().numpy(),val_ds.cardinality().numpy()))
 
 

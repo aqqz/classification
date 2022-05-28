@@ -43,7 +43,8 @@ def genearte_image_list(data_root, class_names):
 def load_data(image_paths, image_labels):
     test_images = []
     test_labels = []
-
+    print("loading data...\n")
+    
     for path in image_paths:
         test_images.append(load_image(path))
 
