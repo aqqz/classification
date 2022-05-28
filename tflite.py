@@ -6,28 +6,26 @@ import time
 
 os.environ["CUDA_VISIBLE_DEVICES"] = "-1"
 
-def lite_convert(model_path, quantization="none", save_path="model/model.tflite", image_list=[], count=100):
+def representative_data_gen():
+    for input_value in tf.data.Dataset.from_tensor_slices(test_images).batch(1).take(100):
+        # Model has only one input so each data point has one element.
+        yield [input_value]
+
+def lite_convert(model_path, quantization="none", save_path="model/model.tflite"):
 
     model = tf.keras.models.load_model(model_path)
     converter = tf.lite.TFLiteConverter.from_keras_model(model)
-    if quantization=='none':
-        # save sample for quantize aware training
-        pass
-    # https://www.tensorflow.org/lite/performance/post_training_integer_quant#%E4%BD%BF%E7%94%A8%E6%B5%AE%E7%82%B9%E5%9B%9E%E9%80%80%E9%87%8F%E5%8C%96%E8%BF%9B%E8%A1%8C%E8%BD%AC%E6%8D%A2
-    elif quantization=='int8':
+    if quantization=='int8':
         print("quantizing model by int8...\n")
-        def representative_dataset():
-            for data in tf.data.Dataset.from_tensor_slices(image_list).batch(1).take(count):
-                yield [tf.dtypes.cast(data, tf.float32)]
-        
         converter.optimizations = [tf.lite.Optimize.DEFAULT]
-        converter.representative_dataset = representative_dataset
+        converter.representative_dataset = representative_data_gen
         converter.target_spec.supported_ops = [tf.lite.OpsSet.TFLITE_BUILTINS_INT8]
+        converter.target_spec.supported_types = [tf.int8]
         converter.inference_input_type = tf.uint8
         converter.inference_output_type = tf.uint8
     print("converting model...\n")
-    tflite_model = converter.convert()
-        
+    tflite_model = converter.convert()  
+
     with open(save_path, "wb") as f:
         f.write(tflite_model)
 
@@ -45,13 +43,14 @@ def evaluate_tflite(model_path, test_images, test_labels):
 
     count = 0
     accuracy = tf.keras.metrics.Accuracy()
-    # 检查是否是量化模型
-    if input_details['dtype'] == np.uint8:
-        input_scale, input_zero_point = input_details['quantization']
+
+    if input_details["dtype"] == np.uint8:
+        input_scale, input_zero_point = input_details["quantization"]
         test_images = test_images / input_scale + input_zero_point
 
     for test_image in test_images:
         input_data = np.expand_dims(test_image, axis=0).astype(input_details['dtype'])
+        # print(input_data)
         test_label = test_labels[count]
         interpreter.set_tensor(input_details['index'], input_data)
         interpreter.invoke()
@@ -78,10 +77,9 @@ if __name__ == '__main__':
     test_img_paths, test_img_labels = generate_voc_image_label_list(cls="person", \
         voc_label_path=voc_label_path, voc_image_path=voc_image_path, mode="val")
     
-    test_images, test_labels = load_data(test_img_paths, test_img_labels, int_quantize=True)
+    test_images, test_labels = load_data(test_img_paths, test_img_labels)
 
-    # lite_convert('model/voc.h5', quantization="none", save_path="model/voc.tflite", \
-    #     image_list=test_images, count=100)
+    lite_convert('model/voc.h5', quantization="int8", save_path="model/voc_q.tflite")
 
     evaluate_tflite(model_path="model/voc_q.tflite", test_images=test_images, test_labels=test_labels)
 
