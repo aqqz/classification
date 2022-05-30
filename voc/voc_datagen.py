@@ -41,11 +41,11 @@ def generate_voc_image_label_list(cls, voc_label_path, voc_image_path, mode="tra
         img_labels.append(img_label)
 
 
-    # shuffle
-    random.seed(123)
-    random.shuffle(img_paths)
-    random.seed(123)
-    random.shuffle(img_labels)
+    # # shuffle 
+    # random.seed(123)
+    # random.shuffle(img_paths)
+    # random.seed(123)
+    # random.shuffle(img_labels)
     
     return img_paths, img_labels
 

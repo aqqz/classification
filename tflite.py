@@ -3,6 +3,8 @@ from voc.voc_datagen import *
 from utils import load_data
 import numpy as np
 import time
+import os
+from keras.preprocessing.image import image
 
 os.environ["CUDA_VISIBLE_DEVICES"] = "-1"
 
@@ -41,6 +43,9 @@ def evaluate_tflite(model_path, test_images, test_labels):
     input_details = interpreter.get_input_details()[0]
     output_details = interpreter.get_output_details()[0]
 
+    tf.print(input_details)
+    tf.print(output_details)
+
     count = 0
     accuracy = tf.keras.metrics.Accuracy()
 
@@ -69,7 +74,18 @@ def evaluate_tflite(model_path, test_images, test_labels):
     count = 0
     accuracy.reset_states()
 
+def save_samples(x_test, y_test, len, mode='gray'):
+    print(f"generate {len} samples for quantize.")
+    x_quant = x_test[:len]
+    y_quant = y_test[:len]
+    count=0
+    if os.path.exists('samples') == False:
+        os.mkdir('samples')
+    for i in x_quant:
+        image.save_img('samples/' + str(count) + '_' + str(y_quant[count]) + '.pgm', i, mode=mode)
+        count += 1
 
+    print("saved samples in samples/")
 
 
 if __name__ == '__main__':
@@ -83,6 +99,7 @@ if __name__ == '__main__':
 
     evaluate_tflite(model_path="model/voc_q.tflite", test_images=test_images, test_labels=test_labels)
 
+    # save_samples(test_images, test_labels, len=100, mode="gray")
     
 
     
