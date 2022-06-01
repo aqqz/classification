@@ -16,6 +16,7 @@ def train(train_ds, val_ds, EPOCHS, BATCH_SIZE=32, lr=0.01, save_path='model/mod
     # 使用预训练权重迁移学习
     # base_model = tf.keras.applications.MobileNet(
     #     input_shape=(224, 224, 3),
+    #     alpha=0.5,
     #     weights="imagenet",
     #     include_top=False
     # )
