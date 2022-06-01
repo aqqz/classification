@@ -25,4 +25,4 @@ if __name__ == '__main__':
         train_ds.cardinality().numpy(),val_ds.cardinality().numpy()))
 
 
-    train.train(train_ds, val_ds, EPOCHS=20, BATCH_SIZE=32, lr=1e-3, save_path="model/voc.h5")
+    train.train(train_ds, val_ds, EPOCHS=50, BATCH_SIZE=32, lr=1e-4, save_path="model/voc.h5")

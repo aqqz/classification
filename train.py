@@ -17,7 +17,7 @@ def train(train_ds, val_ds, EPOCHS, BATCH_SIZE=32, lr=0.01, save_path='model/mod
 
     num_classes = train_ds.element_spec[1].shape[1]
 
-    # 使用预训练权重
+    # 使用预训练权重迁移学习
     base_model = tf.keras.applications.MobileNet(
         input_shape=(224, 224, 3),
         weights="imagenet",
@@ -33,7 +33,7 @@ def train(train_ds, val_ds, EPOCHS, BATCH_SIZE=32, lr=0.01, save_path='model/mod
     output = tf.keras.layers.Dense(num_classes, activation="softmax")(x)
     model = tf.keras.Model(input, output)
 
-    # # 迁移学习
+    # # 微调
     # model = tf.keras.models.load_model("model/voc.h5")
     # model.trainable=True
 
