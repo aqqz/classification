@@ -18,24 +18,24 @@ def train(train_ds, val_ds, EPOCHS, BATCH_SIZE=32, lr=0.01, save_path='model/mod
     num_classes = train_ds.element_spec[1].shape[1]
 
     # 使用预训练权重迁移学习
-    base_model = tf.keras.applications.MobileNet(
-        input_shape=(224, 224, 3),
-        weights="imagenet",
-        include_top=False
-    )
-    base_model.trainable = False
+    # base_model = tf.keras.applications.MobileNet(
+    #     input_shape=(224, 224, 3),
+    #     weights="imagenet",
+    #     include_top=False
+    # )
+    # base_model.trainable = False
     
 
     # 构建模型
-    input = tf.keras.layers.Input(shape=(224, 224, 3))
-    x = base_model(input, training=False)
-    x = tf.keras.layers.GlobalAveragePooling2D()(x)
-    output = tf.keras.layers.Dense(num_classes, activation="softmax")(x)
-    model = tf.keras.Model(input, output)
+    # input = tf.keras.layers.Input(shape=(224, 224, 3))
+    # x = base_model(input, training=False)
+    # x = tf.keras.layers.GlobalAveragePooling2D()(x)
+    # output = tf.keras.layers.Dense(num_classes, activation="softmax")(x)
+    # model = tf.keras.Model(input, output)
 
-    # # 微调
-    # model = tf.keras.models.load_model("model/voc.h5")
-    # model.trainable=True
+    # 微调
+    model = tf.keras.models.load_model("model/voc.h5")
+    model.trainable=True
 
     model.summary()
     
@@ -84,28 +84,27 @@ def train(train_ds, val_ds, EPOCHS, BATCH_SIZE=32, lr=0.01, save_path='model/mod
             tf.summary.scalar('loss', val_loss.result(), step=epoch)
             tf.summary.scalar('accuracy', val_accuracy.result(), step=epoch)
 
+        # 指标清零
+        train_loss.reset_states()
+        train_accuracy.reset_states()
+        val_loss.reset_states()
+        val_accuracy.reset_states()
+
         for step, (images, labels) in enumerate(train_ds):
             train_step(images, labels)
+        
+        for step, (images, labels) in enumerate(val_ds):
+            val_step(images, labels)
         
         pattern = '{:.3f}'
         print(
             'Epoch ' + '{}'.format(epoch+1),
             'Loss: ' + pattern.format(train_loss.result()),
             'Accuracy: ' + pattern.format(train_accuracy.result()),
-            end=', '
-        )
-        train_loss.reset_states()
-        train_accuracy.reset_states()
-
-        for step, (images, labels) in enumerate(val_ds):
-            val_step(images, labels)
-        
-        print(
             'Val Loss: ' + pattern.format(val_loss.result()), 
             'Val Accuracy: ' + pattern.format(val_accuracy.result())
         )
-        val_loss.reset_states()
-        val_accuracy.reset_states()
+        
     
     model.save(save_path)
 
