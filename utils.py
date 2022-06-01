@@ -5,7 +5,7 @@ import numpy as np
 
 def load_image(image_path):
     raw = tf.io.read_file(image_path)
-    img = tf.io.decode_jpeg(raw, channels=1)
+    img = tf.io.decode_jpeg(raw, channels=3)
     img = tf.image.resize(img, [224, 224])
     img = tf.cast(img, tf.float32)    
     img = img / 255

@@ -35,8 +35,10 @@ def generate_voc_image_label_list(cls, voc_label_path, voc_image_path, mode="tra
         img_path = os.path.join(voc_image_path, imgname +'.jpg')
         if imglabel == 1:
             img_label = 0
-        else:
+        elif imglabel == -1:
             img_label = 1
+        else:
+            continue
         img_paths.append(img_path)
         img_labels.append(img_label)
 

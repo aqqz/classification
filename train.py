@@ -1,3 +1,4 @@
+from xml.etree.ElementInclude import include
 import tensorflow as tf
 import datetime
 import os
@@ -15,10 +16,26 @@ def train(train_ds, val_ds, EPOCHS, BATCH_SIZE=32, lr=0.01, save_path='model/mod
     val_ds = val_ds.batch(BATCH_SIZE)
 
     num_classes = train_ds.element_spec[1].shape[1]
+
+    # 使用预训练权重
+    base_model = tf.keras.applications.MobileNet(
+        input_shape=(224, 224, 3),
+        weights="imagenet",
+        include_top=False
+    )
+    base_model.trainable = False
+    
+
     # 构建模型
-    input = tf.keras.layers.Input(shape=(224, 224, 1))
-    output = lenet5(input, num_classes)
+    input = tf.keras.layers.Input(shape=(224, 224, 3))
+    x = base_model(input, training=False)
+    x = tf.keras.layers.GlobalAveragePooling2D()(x)
+    output = tf.keras.layers.Dense(num_classes, activation="softmax")(x)
     model = tf.keras.Model(input, output)
+
+    # # 迁移学习
+    # model = tf.keras.models.load_model("model/voc.h5")
+    # model.trainable=True
 
     model.summary()
     
