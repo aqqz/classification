@@ -1,10 +1,6 @@
-from xml.etree.ElementInclude import include
 import tensorflow as tf
 import datetime
 import os
-from net.lenet5 import lenet5
-from net.googlenet import googlenet
-from net.alexnet import alexnet
 from utils import *
 from loss import loss
 
@@ -27,8 +23,15 @@ def train(train_ds, val_ds, EPOCHS, BATCH_SIZE=32, lr=0.01, save_path='model/mod
     
 
     # 构建模型
-    # input = tf.keras.layers.Input(shape=(224, 224, 3))
-    # x = base_model(input, training=False)
+    # input = tf.keras.layers.Input(shape=(224, 224, 1))
+    # first_layer = tf.keras.layers.SeparableConvolution2D(
+    #     filters=3,
+    #     kernel_size=1,
+    #     strides=1,
+    #     activation=None,
+    #     name="gray2rgb"
+    # )(input)
+    # x = base_model(first_layer, training=False)
     # x = tf.keras.layers.GlobalAveragePooling2D()(x)
     # output = tf.keras.layers.Dense(num_classes, activation="softmax")(x)
     # model = tf.keras.Model(input, output)

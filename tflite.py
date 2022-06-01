@@ -97,9 +97,10 @@ if __name__ == '__main__':
 
     lite_convert('model/voc.h5', quantization="int8", save_path="model/voc_q.tflite")
 
+    save_samples(test_images, test_labels, len=100, mode="gray")
+    
     evaluate_tflite(model_path="model/voc_q.tflite", test_images=test_images, test_labels=test_labels)
 
-    # save_samples(test_images, test_labels, len=100, mode="gray")
     
 
     
