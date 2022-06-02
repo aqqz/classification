@@ -90,16 +90,16 @@ def save_samples(x_test, y_test, len, mode='gray'):
 
 if __name__ == '__main__':
 
-    test_img_paths, test_img_labels = generate_voc_image_label_list(cls="person", \
-        voc_label_path=voc_label_path, voc_image_path=voc_image_path, mode="val")
+    test_img_paths, test_img_labels = generate_paths_labels_list(cls="person", \
+        voc_label_path=voc_label_path, voc_image_path=voc_image_path, mode="val", task='loc')
     
     test_images, test_labels = load_data(test_img_paths, test_img_labels)
 
-    lite_convert('model/voc.h5', quantization="none", save_path="model/voc.tflite")
+    lite_convert('model/voc_finetune.h5', quantization="int8", save_path="model/voc_q.tflite")
 
     # save_samples(test_images, test_labels, len=100, mode="gray")
     
-    evaluate_tflite(model_path="model/voc.tflite", test_images=test_images, test_labels=test_labels)
+    evaluate_tflite(model_path="model/voc_q.tflite", test_images=test_images, test_labels=test_labels)
 
     
 

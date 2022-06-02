@@ -14,32 +14,32 @@ def train(train_ds, val_ds, EPOCHS, BATCH_SIZE=32, lr=0.01, save_path='model/mod
     num_classes = train_ds.element_spec[1].shape[1]
 
     # 使用预训练权重迁移学习
-    # base_model = tf.keras.applications.MobileNet(
-    #     input_shape=(224, 224, 3),
-    #     alpha=0.5,
-    #     weights="imagenet",
-    #     include_top=False
-    # )
-    # base_model.trainable = False
+    base_model = tf.keras.applications.MobileNet(
+        input_shape=(224, 224, 3),
+        alpha=0.5,
+        weights="imagenet",
+        include_top=False
+    )
+    base_model.trainable = False
     
 
     # 构建模型
-    # input = tf.keras.layers.Input(shape=(224, 224, 1))
-    # first_layer = tf.keras.layers.SeparableConvolution2D(
-    #     filters=3,
-    #     kernel_size=1,
-    #     strides=1,
-    #     activation=None,
-    #     name="gray2rgb"
-    # )(input)
-    # x = base_model(first_layer, training=False)
-    # x = tf.keras.layers.GlobalAveragePooling2D()(x)
-    # output = tf.keras.layers.Dense(num_classes, activation="softmax")(x)
-    # model = tf.keras.Model(input, output)
+    input = tf.keras.layers.Input(shape=(224, 224, 1))
+    first_layer = tf.keras.layers.SeparableConvolution2D(
+        filters=3,
+        kernel_size=1,
+        strides=1,
+        activation=None,
+        name="gray2rgb"
+    )(input)
+    x = base_model(first_layer, training=False)
+    x = tf.keras.layers.GlobalAveragePooling2D()(x)
+    output = tf.keras.layers.Dense(num_classes, activation="softmax")(x)
+    model = tf.keras.Model(input, output)
 
     # 微调
-    model = tf.keras.models.load_model("model/voc.h5")
-    model.trainable=True
+    # model = tf.keras.models.load_model("model/voc.h5")
+    # model.trainable=True
 
     model.summary()
     
