@@ -43,8 +43,8 @@ def evaluate_tflite(model_path, test_images, test_labels):
     input_details = interpreter.get_input_details()[0]
     output_details = interpreter.get_output_details()[0]
 
-    tf.print(input_details)
-    tf.print(output_details)
+    # tf.print(input_details)
+    # tf.print(output_details)
 
     count = 0
     accuracy = tf.keras.metrics.Accuracy()
@@ -57,12 +57,13 @@ def evaluate_tflite(model_path, test_images, test_labels):
         input_data = np.expand_dims(test_image, axis=0).astype(input_details['dtype'])
         # print(input_data)
         test_label = test_labels[count]
+        # print(test_label)
         interpreter.set_tensor(input_details['index'], input_data)
         interpreter.invoke()
-        output_data = interpreter.get_tensor(output_details['index'])
+        output_data = interpreter.get_tensor(output_details['index'])[0]
         print(output_data)
-        # 计算精度
-        accuracy.update_state(test_label, tf.argmax(output_data, axis=1))
+        # 计算分类精度
+        accuracy.update_state(tf.argmax(test_label[0:2]), tf.argmax(output_data[0:2]))
         count += 1
 
     end = time.time()
@@ -95,11 +96,11 @@ if __name__ == '__main__':
     
     test_images, test_labels = load_data(test_img_paths, test_img_labels)
 
-    lite_convert('model/voc_finetune.h5', quantization="int8", save_path="model/voc_q.tflite")
+    # lite_convert('model/voc.h5', quantization="none", save_path="model/voc.tflite")
 
     # save_samples(test_images, test_labels, len=100, mode="gray")
     
-    evaluate_tflite(model_path="model/voc_q.tflite", test_images=test_images, test_labels=test_labels)
+    evaluate_tflite(model_path="model/voc.tflite", test_images=test_images, test_labels=test_labels)
 
     
 

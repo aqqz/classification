@@ -25,4 +25,5 @@ if __name__ == '__main__':
         train_ds.cardinality().numpy(),val_ds.cardinality().numpy()))
 
 
-    train.train_locator(train_ds, val_ds, EPOCHS=20, BATCH_SIZE=32, lr=1e-5, save_path="model/voc.h5")
+    train.train_locator(train_ds, val_ds, EPOCHS=100, BATCH_SIZE=32, lr=0.01, \
+        save_path="model/voc.h5")

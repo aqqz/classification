@@ -1,8 +1,10 @@
 import tensorflow as tf
 import datetime
 import os
+from net.lenet5 import lenet5
 from utils import *
 from loss import *
+from model import net
 
 os.environ["CUDA_VISIBLE_DEVICES"] = "0"
 
@@ -13,34 +15,10 @@ def train(train_ds, val_ds, EPOCHS, BATCH_SIZE=32, lr=0.01, save_path='model/mod
 
     num_classes = train_ds.element_spec[1].shape[1]
 
-    # 使用预训练权重迁移学习
-    base_model = tf.keras.applications.MobileNet(
-        input_shape=(224, 224, 3),
-        alpha=0.5,
-        weights="imagenet",
-        include_top=False
-    )
-    base_model.trainable = False
-    
-
     # 构建模型
     input = tf.keras.layers.Input(shape=(224, 224, 1))
-    first_layer = tf.keras.layers.SeparableConvolution2D(
-        filters=3,
-        kernel_size=1,
-        strides=1,
-        activation=None,
-        name="gray2rgb"
-    )(input)
-    x = base_model(first_layer, training=False)
-    x = tf.keras.layers.GlobalAveragePooling2D()(x)
-    output = tf.keras.layers.Dense(num_classes, activation="softmax")(x)
+    output = lenet5(input, num_classes)
     model = tf.keras.Model(input, output)
-
-    # 微调
-    # model = tf.keras.models.load_model("model/voc.h5")
-    # model.trainable=True
-
     model.summary()
     
     # 训练配置
@@ -120,39 +98,14 @@ def train_locator(train_ds, val_ds, EPOCHS, BATCH_SIZE=32, lr=0.01, save_path='m
 
     num_classes = 2
 
-    # 使用预训练权重迁移学习
-    # base_model = tf.keras.applications.MobileNet(
-    #     input_shape=(224, 224, 3),
-    #     alpha=0.5,
-    #     weights="imagenet",
-    #     include_top=False
-    # )
-    # base_model.trainable = False
-    
-
     # 构建模型
-    # input = tf.keras.layers.Input(shape=(224, 224, 1))
-    # first_layer = tf.keras.layers.SeparableConvolution2D(
-    #     filters=3,
-    #     kernel_size=1,
-    #     strides=1,
-    #     activation=None,
-    #     name="gray2rgb"
-    # )(input)
-    # x = base_model(first_layer, training=False)
-    # x = tf.keras.layers.GlobalAveragePooling2D()(x)
-    # output1 = tf.keras.layers.Dense(num_classes, activation="softmax")(x)
-    # output2 = tf.keras.layers.Dense(4, activation="relu")(x)
-    # model = tf.keras.Model(input, [output1, output2])
-
-    # 微调
-    model = tf.keras.models.load_model("model/voc.h5")
-    model.trainable=True
-
+    input = tf.keras.layers.Input(shape=(224, 224, 1))
+    output = net(input, num_classes)
+    model = tf.keras.Model(input, output)
     model.summary()
     
     # 训练配置
-    optimizer = tf.keras.optimizers.Adam(learning_rate=lr)
+    optimizer = tf.keras.optimizers.SGD(learning_rate=lr)
     
     # 记录指标
     train_loss = tf.keras.metrics.Mean(name="train_loss")
@@ -234,6 +187,6 @@ if __name__ == '__main__':
 
     train_ds, val_ds = generate_split_dataset(image_paths, image_labels, class_names, split_rate=0.8)
 
-    train(train_ds, val_ds, EPOCHS=50, BATCH_SIZE=32, lr=1e-4, save_path='model/model.h5')
+    train(train_ds, val_ds, EPOCHS=50, BATCH_SIZE=32, lr=0.01, save_path='model/model.h5')
 
     
