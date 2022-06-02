@@ -1,15 +1,15 @@
 import tensorflow as tf
 
 # loss function for cls
-# def loss(y_true, y_pred):
-#     # tf.print("y_true: ", y_true)
-#     # tf.print("y_pred: ", y_pred)
-#     loss_fn = tf.keras.losses.CategoricalCrossentropy()
-#     loss_value = loss_fn(y_true, y_pred)
-#     return loss_value
+def cls_loss(y_true, y_pred):
+    # tf.print("y_true: ", y_true)
+    # tf.print("y_pred: ", y_pred)
+    loss_fn = tf.keras.losses.CategoricalCrossentropy()
+    loss_value = loss_fn(y_true, y_pred)
+    return loss_value
 
 # loss function for cls+loc
-def loss(y_true, y_pred):
+def loc_loss(y_true, y_pred):
     # tf.print("y_true: ", y_true)
     # tf.print("y_pred: ", y_pred)
     cls_loss_fn = tf.keras.losses.CategoricalCrossentropy()
