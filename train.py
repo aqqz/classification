@@ -21,7 +21,7 @@ def train(train_ds, val_ds, EPOCHS, BATCH_SIZE=32, lr=0.01, save_path='model/mod
     model.summary()
     
     # 训练配置
-    optimizer = tf.keras.optimizers.Adam(learning_rate=lr)
+    optimizer = tf.keras.optimizers.SGD(learning_rate=lr)
     
     # 记录指标
     train_loss = tf.keras.metrics.Mean(name="train_loss")
