@@ -1,20 +1,22 @@
 import tensorflow as tf
-from keras.layers import Conv2D, MaxPooling2D, Flatten, Dense, BatchNormalization, ReLU
+from keras.layers import Conv2D, Dense, Flatten, GlobalAveragePooling2D
 
-
+base_model = tf.keras.applications.MobileNet(
+    alpha=0.5,
+    input_shape=(224, 224, 3),
+    weights='imagenet',
+    include_top=False,
+)
+base_model.trainable = False
 
 def net(input, num_classes):
-    x = Conv2D(32, (5, 5), strides=2, padding="same")(input)
-    x = ReLU()(x)
-    x = MaxPooling2D(2, 2)(x)
+    gray2rgb = Conv2D(3, kernel_size=1, activation=None)(input)
+    
+    x = base_model(gray2rgb, training=False)
+    x = GlobalAveragePooling2D()(x)
 
-    x = Conv2D(16, (3, 3), padding="same")(x)
-    x = ReLU()(x)
-    x = MaxPooling2D(2, 2)(x)
+    out = Dense(num_classes, activation="softmax")(x)
 
-    x = Flatten()(x)
+    return out
+    
 
-    out1 = Dense(num_classes, activation="softmax")(x)
-    out2 = Dense(4, activation="relu")(x)
-
-    return out1, out2

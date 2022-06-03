@@ -63,7 +63,7 @@ def evaluate_tflite(model_path, test_images, test_labels):
         output_data = interpreter.get_tensor(output_details['index'])[0]
         print(output_data)
         # 计算分类精度
-        accuracy.update_state(tf.argmax(test_label[0:2]), tf.argmax(output_data[0:2]))
+        accuracy.update_state(tf.argmax(test_label), tf.argmax(output_data))
         count += 1
 
     end = time.time()
@@ -92,13 +92,13 @@ def save_samples(x_test, y_test, len, mode='gray'):
 if __name__ == '__main__':
 
     test_img_paths, test_img_labels = generate_paths_labels_list(cls="person", \
-        voc_label_path=voc_label_path, voc_image_path=voc_image_path, mode="val", task='loc')
+        voc_label_path=voc_label_path, voc_image_path=voc_image_path, mode="val")
     
     test_images, test_labels = load_data(test_img_paths, test_img_labels)
 
-    # lite_convert('model/voc.h5', quantization="none", save_path="model/voc.tflite")
+    lite_convert('model/voc.h5', quantization="none", save_path="model/voc.tflite")
 
-    # save_samples(test_images, test_labels, len=100, mode="gray")
+    save_samples(test_images, test_labels, len=100, mode="gray")
     
     evaluate_tflite(model_path="model/voc.tflite", test_images=test_images, test_labels=test_labels)
 

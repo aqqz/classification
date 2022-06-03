@@ -13,10 +13,10 @@ if __name__ == '__main__':
     print(class_names)
 
     train_img_paths, train_img_labels = generate_paths_labels_list(
-        test_class, voc_label_path, voc_image_path, mode="train", task="loc")
+        test_class, voc_label_path, voc_image_path, mode="train")
 
     val_img_paths, val_img_labels = generate_paths_labels_list(
-        test_class, voc_label_path, voc_image_path, mode="val", task="loc")
+        test_class, voc_label_path, voc_image_path, mode="val")
 
     train_ds = generate_dataset(train_img_paths, train_img_labels)
     val_ds = generate_dataset(val_img_paths, val_img_labels)
@@ -25,5 +25,5 @@ if __name__ == '__main__':
         train_ds.cardinality().numpy(),val_ds.cardinality().numpy()))
 
 
-    train.train_locator(train_ds, val_ds, EPOCHS=100, BATCH_SIZE=32, lr=0.01, \
+    train.train_locator(train_ds, val_ds, EPOCHS=200, BATCH_SIZE=32, lr=1e-3, \
         save_path="model/voc.h5")

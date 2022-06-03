@@ -5,22 +5,11 @@ import numpy as np
 import xml.etree.ElementTree as et
 
 
-def parse_xml_cls_loc(xml_path, class_name):
+def parse_xml(xml_path):
     tree = et.parse(xml_path)
     root = tree.getroot()
-    for size in root.findall('size'):
-        img_w = eval(size.find('width').text)
-        img_h = eval(size.find('height').text)
-    for object in root.findall('object'):
-        cls = object.find('name').text
-        if cls == class_name:
-            bbox = object.find('bndbox')
-            xmin = eval(bbox.find('xmin').text)
-            ymin = eval(bbox.find('ymin').text)
-            xmax = eval(bbox.find('xmax').text)
-            ymax = eval(bbox.find('ymax').text)
-            break
-    return img_w, img_h, xmin, ymin, xmax, ymax
+    # todo
+    
         
 
 def load_image(image_path):
