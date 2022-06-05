@@ -2,13 +2,6 @@ import tensorflow as tf
 import os
 import random
 import numpy as np
-import xml.etree.ElementTree as et
-
-
-def parse_xml(xml_path):
-    tree = et.parse(xml_path)
-    root = tree.getroot()
-    # todo
     
         
 
