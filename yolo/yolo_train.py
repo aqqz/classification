@@ -27,7 +27,7 @@ def train_yolo(train_ds, val_ds, EPOCHS, BATCH_SIZE=32, lr=0.01, optim="sgd", sa
     # 记录指标
     train_loss = tf.keras.metrics.Mean(name="train_loss")
     val_loss = tf.keras.metrics.Mean(name="val_loss")
-    train_acc = tf.kears.metrics.Accuracy(name="train_acc")
+    train_acc = tf.keras.metrics.Accuracy(name="train_acc")
     val_acc = tf.keras.metrics.Accuracy(name="val_acc")
 
     current_time = datetime.datetime.now().strftime("%Y%m%d-%H%M%S")
@@ -44,14 +44,14 @@ def train_yolo(train_ds, val_ds, EPOCHS, BATCH_SIZE=32, lr=0.01, optim="sgd", sa
         gradients = tape.gradient(loss_value, model.trainable_variables)
         optimizer.apply_gradients(zip(gradients, model.trainable_variables))
         train_loss(loss_value)
-        train_acc()
+        # train_acc()
 
     @tf.function
     def val_step(images, labels):
         logits = model(images)
         loss_value = yolo_loss(labels, logits)
         val_loss(loss_value)
-        val_acc()
+        # val_acc()
 
 
     # 训练循环
@@ -104,4 +104,4 @@ if __name__ == '__main__':
         train_ds.cardinality().numpy(), val_ds.cardinality().numpy()))
 
 
-    train_yolo(train_ds, val_ds, EPOCHS=10, BATCH_SIZE=32, lr=0.01, optim="sgd", save_path="model/yolo.h5")
+    train_yolo(train_ds, val_ds, EPOCHS=10, BATCH_SIZE=32, lr=0.1, optim="sgd", save_path="model/yolo.h5")
