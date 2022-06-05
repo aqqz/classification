@@ -11,7 +11,7 @@ img_size = 224
 grid_size = img_size // S
 
 def generate_yolo_label(img_w, img_h, ob_infos, cell=S):
-    image_label = np.zeros((cell, cell, 5+C))
+    image_label = np.zeros((cell, cell, 5+C), dtype="float32")
     
     for ob_info in ob_infos:
         # [ob_id, xmin, ymin, xmax, ymax]
@@ -46,6 +46,7 @@ def generate_yolo_label(img_w, img_h, ob_infos, cell=S):
 
     return image_label
 
+
 def generate_image_list(txt_file):
     image_paths = []
     image_labels = []
@@ -62,7 +63,7 @@ def generate_image_list(txt_file):
         
         # generate_yolo_label
         img_label = generate_yolo_label(img_w, img_h, ob_infos)
-        break
+        
         # fill image_paths image_labels
         image_paths.append(img_path)
         image_labels.append(img_label)
@@ -82,5 +83,13 @@ def generate_image_list(txt_file):
 
 
 if __name__ == '__main__':
-    generate_image_list(os.path.join(voc_label_path, 'train.txt'))
+    train_image_paths, train_image_labels = generate_image_list(os.path.join(
+        voc_label_path, 'train.txt'))
+    val_image_paths, val_image_labels = generate_image_list(os.path.join(
+        voc_label_path, 'val.txt'))
 
+    train_ds = generate_dataset(train_image_paths, train_image_labels)
+    val_ds = generate_dataset(val_image_paths, val_image_labels)
+
+    tf.print(train_ds)
+    tf.print(val_ds)
