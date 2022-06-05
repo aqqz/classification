@@ -2,6 +2,7 @@ import tensorflow as tf
 import os
 import random
 import numpy as np
+import cv2
     
         
 
@@ -80,3 +81,12 @@ def generate_split_dataset(image_paths, image_labels, class_names, split_rate=0.
 
     return train_dataset, val_dataset
 
+
+
+def draw_box(img_path, ob_infos):
+    img = cv2.imread(img_path)
+    cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
+    for ob_info in ob_infos:
+        xmin, ymin, xmax, ymax = ob_info[1], ob_info[2], ob_info[3], ob_info[4]
+        cv2.rectangle(img, (xmin, ymin), (xmax, ymax), color=(0, 0, 255), thickness=2, lineType=1)
+    cv2.imwrite('test.jpg', img)
