@@ -91,7 +91,7 @@ def save_samples(x_test, y_test, len, mode='gray'):
 
 if __name__ == '__main__':
 
-    test_img_paths, test_img_labels = generate_paths_labels_list(cls="person", \
+    test_img_paths, test_img_labels = generate_image_list(cls="person", \
         voc_label_path=voc_label_path, voc_image_path=voc_image_path, mode="val")
     
     test_images, test_labels = load_data(test_img_paths, test_img_labels)

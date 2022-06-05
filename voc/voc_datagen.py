@@ -1,4 +1,3 @@
-from ast import parse
 import os
 import random
 import tensorflow as tf
@@ -45,7 +44,7 @@ def parse_xml(xml_path):
     return img_name, img_w, img_h, ob_infos
 
 
-def generate_paths_labels_list(cls, voc_label_path, voc_image_path, mode="train"):    
+def generate_image_list(cls, voc_label_path, voc_image_path, mode="train"):    
     img_paths = []
     img_labels = []
     

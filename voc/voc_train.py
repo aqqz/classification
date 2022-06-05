@@ -12,10 +12,10 @@ if __name__ == '__main__':
     class_names = [test_class, 'no'+ test_class]
     print(class_names)
 
-    train_img_paths, train_img_labels = generate_paths_labels_list(test_class, \
+    train_img_paths, train_img_labels = generate_image_list(test_class, \
         voc_label_path, voc_image_path, mode="train")
 
-    val_img_paths, val_img_labels = generate_paths_labels_list(test_class, \
+    val_img_paths, val_img_labels = generate_image_list(test_class, \
         voc_label_path, voc_image_path, mode="val")
 
     train_ds = generate_dataset(train_img_paths, train_img_labels)
