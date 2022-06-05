@@ -78,18 +78,3 @@ def generate_image_list(txt_file):
 
 
     return image_paths, image_labels
-
-
-
-
-if __name__ == '__main__':
-    train_image_paths, train_image_labels = generate_image_list(os.path.join(
-        voc_label_path, 'train.txt'))
-    val_image_paths, val_image_labels = generate_image_list(os.path.join(
-        voc_label_path, 'val.txt'))
-
-    train_ds = generate_dataset(train_image_paths, train_image_labels)
-    val_ds = generate_dataset(val_image_paths, val_image_labels)
-
-    tf.print(train_ds)
-    tf.print(val_ds)
