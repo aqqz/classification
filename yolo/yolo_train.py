@@ -5,13 +5,15 @@ from data_gen import *
 import datetime
 
 
-def train_yolo(train_ds, val_ds, EPOCHS, BATCH_SIZE=32, lr=0.01, optim="sgd", save_path="model/yolo.h5"):
+def train_yolo(train_ds, val_ds, EPOCHS, BATCH_SIZE=32, lr=0.01, optim="sgd", save_path="model/yolo.h5", finetune=False):
 
     # 载入模型
     input = tf.keras.layers.Input(shape=(224, 224, 1))
     output = yolo_net(input)
     model = tf.keras.models.Model(input, output)
-
+    if finetune==True:
+        model = tf.keras.models.load_model(save_path)
+        model.trainable = True
     model.summary()
 
     # 配置优化器、学习率
@@ -104,4 +106,5 @@ if __name__ == '__main__':
         train_ds.cardinality().numpy(), val_ds.cardinality().numpy()))
 
 
-    train_yolo(train_ds, val_ds, EPOCHS=100, BATCH_SIZE=32, lr=1e-4, optim="adam", save_path="model/yolo.h5")
+    train_yolo(train_ds, val_ds, EPOCHS=10, BATCH_SIZE=32, lr=1e-4, optim="adam", \
+        save_path="model/yolo.h5", finetune=False)

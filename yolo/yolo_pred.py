@@ -2,17 +2,13 @@ import sys
 sys.path.append('.')
 
 import tensorflow as tf
-from voc.voc_datagen import *
+from data_gen import *
 from utils import draw_box, load_image
 
 import os
 import cv2
 
 
-S = 4
-C = 20
-img_size = 224
-grid_size = img_size // S
 
 def post_progress(img_w, img_h, output):
     ob_infos = []
@@ -21,7 +17,7 @@ def post_progress(img_w, img_h, output):
             grid_vector = output[0, i, j]
             # tf.print(grid_vector)
             # [ob_exist, x, y, w, h, ..., C]
-            if grid_vector[0] > 0.5:
+            if grid_vector[0] > 0.4:
                 scale_x = img_w / img_size
                 scale_y = img_h / img_size
                 normal_x = grid_vector[1]

@@ -89,5 +89,5 @@ def draw_box(img_path, ob_infos):
     for ob_info in ob_infos:
         xmin, ymin, xmax, ymax = ob_info[1], ob_info[2], ob_info[3], ob_info[4]
         cv2.rectangle(img, (xmin, ymin), (xmax, ymax), color=(0, 0, 255), thickness=2, lineType=1)
-        cv2.putText(img, text=str(ob_info[0]), org=(xmin-5, ymin-5), fontFace=1, fontScale=1, color=(0, 0, 255), thickness=1, lineType=1)
+        cv2.putText(img, text=str(ob_info[0]), org=(xmin-3, ymin-3), fontFace=1, fontScale=1, color=(0, 0, 255), thickness=1, lineType=1)
     cv2.imwrite('test.jpg', img)
