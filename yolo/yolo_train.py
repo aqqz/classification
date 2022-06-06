@@ -104,4 +104,4 @@ if __name__ == '__main__':
         train_ds.cardinality().numpy(), val_ds.cardinality().numpy()))
 
 
-    train_yolo(train_ds, val_ds, EPOCHS=10, BATCH_SIZE=32, lr=0.1, optim="sgd", save_path="model/yolo.h5")
+    train_yolo(train_ds, val_ds, EPOCHS=50, BATCH_SIZE=32, lr=1e-4, optim="adam", save_path="model/yolo.h5")

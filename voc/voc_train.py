@@ -2,7 +2,7 @@ from voc_datagen import *
 import sys
 sys.path.append('.')
 
-import train
+from train import train
 
 os.environ["CUDA_VISIBLE_DEVICES"] = "0"
 
@@ -24,4 +24,4 @@ if __name__ == '__main__':
     print("training on {} examples, validating on {} examples\n".format(
         train_ds.cardinality().numpy(),val_ds.cardinality().numpy()))
 
-    train.train(train_ds, val_ds, EPOCHS=50, BATCH_SIZE=32, lr=0.01, save_path="model/voc.h5")
+    train(train_ds, val_ds, EPOCHS=50, BATCH_SIZE=32, lr=0.01, save_path="model/voc.h5")

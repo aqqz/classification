@@ -4,7 +4,7 @@ import tensorflow as tf
 
 import sys
 sys.path.append('.')
-import utils
+from utils import draw_box, load_image
 import xml.etree.ElementTree as et
 
 voc_label_path = '/home/taozhi/datasets/VOCdevkit/VOC2012/ImageSets/Main'
@@ -82,7 +82,7 @@ def generate_image_list(cls, voc_label_path, voc_image_path, mode="train"):
 
 def generate_dataset(image_paths, image_labels):
 
-    image_dataset = tf.data.Dataset.from_tensor_slices(image_paths).map(utils.load_image)
+    image_dataset = tf.data.Dataset.from_tensor_slices(image_paths).map(load_image)
     label_dataset = tf.data.Dataset.from_tensor_slices(image_labels)
     dataset = tf.data.Dataset.zip((image_dataset, label_dataset))
 
@@ -95,4 +95,4 @@ if __name__ == '__main__':
     xml_path = os.path.join(voc_annotation_path, '2007_000032.xml')
     img_name, img_w, img_h, ob_infos = parse_xml(xml_path)
     img_path = os.path.join(voc_image_path, img_name)
-    utils.draw_box(img_path, ob_infos)
+    draw_box(img_path, ob_infos)
