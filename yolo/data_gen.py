@@ -33,8 +33,8 @@ def generate_yolo_label(img_w, img_h, ob_infos, cell=S):
         grid_Y = int(ob_Y // grid_size)
         normal_X = ob_X / grid_size - grid_X
         normal_Y = ob_Y / grid_size - grid_Y
-        normal_W = ob_W / grid_size
-        normal_H = ob_H / grid_size
+        normal_W = ob_W / img_size
+        normal_H = ob_H / img_size
         # print(grid_X, grid_Y, normal_X, normal_Y, normal_W, normal_H)
 
         # fill label
