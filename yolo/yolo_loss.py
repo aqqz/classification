@@ -1,6 +1,3 @@
-from matplotlib import scale
-from matplotlib.pyplot import sca
-from numpy import negative
 import tensorflow as tf
 
 
@@ -38,10 +35,12 @@ def yolo_loss(y_true, y_pred):
     negative_loss = tf.reduce_mean(negative_loss)
     # tf.print(negative_loss)
     
-    # 正样本类别损失
-    cls_loss = tf.square(y_true[..., 5:]-y_pred[..., 5:]) #(?, 4, 4, 20)
-    cls_loss = ob_exist * tf.reduce_sum(cls_loss, axis=3) # (?, 4, 4)
-    cls_loss = tf.reduce_mean(cls_loss)
+    # 类别损失
+    category_loss_fn = tf.keras.losses.CategoricalCrossentropy(from_logits=True)
+    cls_loss = category_loss_fn(y_true[..., 5:], y_pred[..., 5:])
+    # cls_loss = tf.square(y_true[..., 5:]-y_pred[..., 5:]) #(?, 4, 4, 20)
+    # cls_loss = ob_exist * tf.reduce_sum(cls_loss, axis=3) # (?, 4, 4)
+    # cls_loss = tf.reduce_mean(tf.reduce_sum(cls_loss, axis=[1, 2]))
     # tf.print(cls_loss)
 
     total_loss = lambda_coord*loc_loss + lambda_coord*scale_loss + \
