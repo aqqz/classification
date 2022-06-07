@@ -87,3 +87,11 @@ def generate_dataset(image_paths, image_labels):
     dataset = tf.data.Dataset.zip((image_dataset, label_dataset))
 
     return dataset
+
+
+if __name__ == '__main__':
+    
+    xml_path = os.path.join(voc_annotation_path, '2007_000032.xml')
+    img_name, img_w, img_h, ob_infos = parse_xml(xml_path)
+    img_path = os.path.join(voc_image_path, img_name)
+    draw_box(img_path, ob_infos)

@@ -5,7 +5,7 @@ from voc.voc_datagen import *
 import numpy as np
 
 
-S = 4
+S = 7
 C = 20
 img_size = 224
 grid_size = img_size // S
@@ -47,6 +47,46 @@ def generate_yolo_label(img_w, img_h, ob_infos, cell=S):
     return image_label
 
 
+def post_progress(img_w, img_h, output):
+    ob_infos = []
+    for i in range(S):
+        for j in range(S):
+            grid_vector = output[0, i, j]
+            # tf.print(grid_vector)
+            # [ob_exist, x, y, w, h, ..., C]
+            if grid_vector[0] > 0.5:
+                scale_x = img_w / img_size
+                scale_y = img_h / img_size
+                normal_x = grid_vector[1]
+                normal_y = grid_vector[2]
+                normal_w = grid_vector[3]
+                normal_h = grid_vector[4]
+                # tf.print(normal_x, normal_y, normal_w, normal_h)
+                # exist object
+                ob_x = (normal_x + i) * grid_size
+                ob_y = (normal_y + j) * grid_size
+                ob_w = normal_w * img_size
+                ob_h = normal_h * img_size
+                # tf.print(ob_x, ob_y, ob_w, ob_h)
+                ob_x *= scale_x
+                ob_y *= scale_y
+                ob_w *= scale_x
+                ob_h *= scale_y
+                # tf.print(ob_x, ob_y, ob_w, ob_h)
+                xmin = int(ob_x - ob_w / 2)
+                ymin = int(ob_y - ob_h / 2) 
+                xmax = int(ob_x + ob_w / 2) 
+                ymax = int(ob_y + ob_h / 2)
+                # tf.print(xmin, ymin, xmax, ymax)
+                cls_vector = grid_vector[5:]
+                cls = tf.argmax(cls_vector).numpy()
+                # tf.print(cls)
+                # todo nms
+                ob_infos.append([cls, xmin, ymin, xmax, ymax])
+    # print(ob_infos)
+    return ob_infos
+
+
 def generate_image_list(txt_file):
     image_paths = []
     image_labels = []
@@ -80,9 +120,14 @@ def generate_image_list(txt_file):
     return image_paths, image_labels
 
 
+
 if __name__ == '__main__':
-    
     xml_path = os.path.join(voc_annotation_path, '2007_000032.xml')
+    test_img = os.path.join(voc_image_path, '2007_000032.jpg')
     img_name, img_w, img_h, ob_infos = parse_xml(xml_path)
-    img_path = os.path.join(voc_image_path, img_name)
-    draw_box(img_path, ob_infos)
+    img_label = generate_yolo_label(img_w, img_h, ob_infos)
+    # print(img_label)
+    output = tf.expand_dims(img_label, axis=0)
+    ob_infos = post_progress(img_w, img_h, output)
+    draw_box(test_img, ob_infos)
+
