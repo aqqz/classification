@@ -17,7 +17,7 @@ def post_progress(img_w, img_h, output):
             grid_vector = output[0, i, j]
             # tf.print(grid_vector)
             # [ob_exist, x, y, w, h, ..., C]
-            if grid_vector[0] > 0.9:
+            if grid_vector[0] > 0.5:
                 scale_x = img_w / img_size
                 scale_y = img_h / img_size
                 normal_x = grid_vector[1]
@@ -44,6 +44,7 @@ def post_progress(img_w, img_h, output):
                 cls_vector = grid_vector[5:]
                 cls = tf.argmax(cls_vector).numpy()
                 # tf.print(cls)
+                # todo nms
                 ob_infos.append([cls, xmin, ymin, xmax, ymax])
     # print(ob_infos)
     return ob_infos
@@ -54,7 +55,7 @@ def post_progress(img_w, img_h, output):
 
 if __name__ == '__main__':
     
-    test_img = os.path.join(voc_image_path, '2007_000032.jpg')
+    test_img = os.path.join(voc_image_path, '2008_000026.jpg')
     img = load_image(test_img)
     input = tf.expand_dims(img, axis=0)
     model = tf.keras.models.load_model("model/yolo.h5")

@@ -69,6 +69,7 @@ def yolo_loss(y_true, y_pred):
     ob_exist = y_true[..., 0] #(?, 4, 4)
     # tf.print(ob_exist)
     iou_mask = compute_iou(y_true[..., 1:5], y_pred[..., 1:5]) # (?, 4, 4)
+    iou_mask = tf.where(tf.greater(iou_mask, tf.ones_like(iou_mask)*0.5), tf.ones_like(iou_mask), tf.zeros_like(iou_mask))
     # tf.print(iou_mask)
 
     # 正样本中心点定位损失
@@ -95,7 +96,7 @@ def yolo_loss(y_true, y_pred):
     # 类别损失
     prob = tf.math.softmax(y_pred[..., 5:], axis=3) #(?, 4, 4, 20)  
     cls_loss = tf.square(y_true[..., 5:]-prob) #(?, 4, 4, 20)
-    cls_loss = ob_exist * tf.reduce_sum(cls_loss, axis=3) # (?, 4, 4)
+    cls_loss = ob_exist*tf.reduce_sum(cls_loss, axis=3) # (?, 4, 4)
     cls_loss = tf.reduce_mean(tf.reduce_sum(cls_loss, axis=[1, 2]))
     # tf.print(cls_loss)
 

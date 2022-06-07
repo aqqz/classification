@@ -19,7 +19,7 @@ def yolo_net(input):
     x = base_model(gray2rgb, training=False)
 
     x = GlobalAveragePooling2D()(x)
-    x = Dense(S*S*(5+C))(x)
+    x = Dense(S*S*(5+C), activation="relu")(x)
     x = Reshape(target_shape=(S, S, 5+C))(x)
 
     return x
