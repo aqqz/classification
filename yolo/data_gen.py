@@ -9,6 +9,7 @@ S = 7
 C = 20
 img_size = 224
 grid_size = img_size // S
+threshold = 0.5
 
 def generate_yolo_label(img_w, img_h, ob_infos, cell=S):
     image_label = np.zeros((cell, cell, 5+C), dtype="float32")
@@ -52,9 +53,9 @@ def post_progress(img_w, img_h, output):
     for i in range(S):
         for j in range(S):
             grid_vector = output[0, i, j]
-            # tf.print(grid_vector)
+            tf.print(grid_vector)
             # [ob_exist, x, y, w, h, ..., C]
-            if grid_vector[0] > 0.5:
+            if grid_vector[0] > threshold:
                 scale_x = img_w / img_size
                 scale_y = img_h / img_size
                 normal_x = grid_vector[1]
