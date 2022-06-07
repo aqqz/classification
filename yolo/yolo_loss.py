@@ -11,14 +11,14 @@ def compute_iou(y_true, y_pred):
     normal_x, normal_y, normal_w, normal_h = y_true[..., 0], y_true[..., 1], y_true[..., 2], y_true[..., 3] #(?, 4, 4)
     _normal_x, _normal_y, _normal_w, _normal_h = y_pred[..., 0], y_pred[..., 1], y_pred[..., 2], y_pred[..., 3] #(?, 4, 4)
     B = y_true.shape[0]
-    offset_x = np.array([np.array([[i for i in range(S)]*S]).reshape(S, S).transpose()]*B) #(?, 4, 4)
-    offset_x = offset_x.astype("float32")
-    offset_x = tf.convert_to_tensor(offset_x, dtype=tf.float32)
+    
+    offset_x = np.array([np.array([[i for i in range(S)]*S]).reshape(S, S)]*B).astype("float32") #(?, 4, 4)
+    offset_x = tf.convert_to_tensor(offset_x)
     # tf.print(offset_x)
-    offset_y = np.array([np.array([[i for i in range(S)]*S]).reshape(S, S)]*B) #(?, 4, 4)
-    offset_y = offset_y.astype("float32")
-    offset_y = tf.convert_to_tensor(offset_y, dtype=tf.float32)
+    offset_y = np.array([np.array([[i for i in range(S)]*S]).reshape(S, S).transpose()]*B).astype("float32") #(?, 4, 4)
+    offset_y = tf.convert_to_tensor(offset_y)
     # tf.print(offset_y)
+    
     x = (normal_x + offset_x)*grid_size
     y = (normal_y + offset_y)*grid_size
     w = normal_w * img_size

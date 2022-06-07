@@ -1,5 +1,5 @@
 import tensorflow as tf
-from keras.layers import Conv2D, Dense, Reshape, GlobalAveragePooling2D
+from keras.layers import Conv2D, Dense, Reshape, GlobalAveragePooling2D, Flatten, Dropout
 
 
 from data_gen import *
@@ -19,8 +19,7 @@ def yolo_net(input):
     x = base_model(gray2rgb, training=False)
 
     x = GlobalAveragePooling2D()(x)
-
-    x = Dense(S*S*(5+C), activation="sigmoid")(x)
+    x = Dense(S*S*(5+C))(x)
     x = Reshape(target_shape=(S, S, 5+C))(x)
 
     return x

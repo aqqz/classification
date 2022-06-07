@@ -17,7 +17,7 @@ def post_progress(img_w, img_h, output):
             grid_vector = output[0, i, j]
             # tf.print(grid_vector)
             # [ob_exist, x, y, w, h, ..., C]
-            if grid_vector[0] > 0.4:
+            if grid_vector[0] > 0.9:
                 scale_x = img_w / img_size
                 scale_y = img_h / img_size
                 normal_x = grid_vector[1]
