@@ -4,8 +4,10 @@ from yolo_loss import yolo_loss
 from data_gen import *
 import datetime
 
+os.environ["CUDA_VISIBLE_DEVICES"] = "0"
 
-def train_yolo(train_ds, val_ds, EPOCHS, BATCH_SIZE=32, lr=0.01, optim="sgd", save_path="model/yolo.h5", finetune=False):
+def train_yolo(train_ds, val_ds, EPOCHS, BATCH_SIZE=32, lr=0.01, optim="sgd", save_path="model/yolo.h5", \
+    finetune=False):
 
     # 载入模型
     input = tf.keras.layers.Input(shape=(224, 224, 1))
@@ -106,5 +108,5 @@ if __name__ == '__main__':
         train_ds.cardinality().numpy(), val_ds.cardinality().numpy()))
 
 
-    train_yolo(train_ds, val_ds, EPOCHS=10, BATCH_SIZE=32, lr=1e-4, optim="adam", \
+    train_yolo(train_ds, val_ds, EPOCHS=1, BATCH_SIZE=32, lr=1e-3, optim="adam", \
         save_path="model/yolo.h5", finetune=False)

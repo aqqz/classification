@@ -5,7 +5,7 @@ from voc.voc_datagen import *
 import numpy as np
 
 
-S = 7
+S = 4
 C = 20
 img_size = 224
 grid_size = img_size // S

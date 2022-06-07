@@ -54,7 +54,7 @@ def post_progress(img_w, img_h, output):
 
 if __name__ == '__main__':
     
-    test_img = os.path.join(voc_image_path, '2008_000002.jpg')
+    test_img = os.path.join(voc_image_path, '2007_000032.jpg')
     img = load_image(test_img)
     input = tf.expand_dims(img, axis=0)
     model = tf.keras.models.load_model("model/yolo.h5")
