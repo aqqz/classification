@@ -14,7 +14,7 @@ base_model = tf.keras.applications.MobileNet(
 
 base_model.trainable=False
 
-def yolo_net(input, bbox_num=2, class_num=20):
+def yolo_net(input, bbox_num=1, class_num=20):
     # backbone
     gray2rgb = Conv2D(3, kernel_size=1, strides=1, activation=None, name="gray2rgb")(input)
     x = base_model(gray2rgb, training=False)

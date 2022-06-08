@@ -20,7 +20,7 @@ def train_yolo(train_ds, val_ds, EPOCHS, BATCH_SIZE=32, lr=0.01, optim="sgd", sa
 
     # 配置优化器、学习率
     if optim=="sgd":
-        optimizer = tf.keras.optimizers.SGD(learning_rate=lr)
+        optimizer = tf.keras.optimizers.SGD(learning_rate=lr, momentum=0.9, decay=0.0005)
     elif optim=="adam":
         optimizer = tf.keras.optimizers.Adam(learning_rate=lr)
 
@@ -108,5 +108,5 @@ if __name__ == '__main__':
         train_ds.cardinality().numpy(), val_ds.cardinality().numpy()))
 
 
-    train_yolo(train_ds, val_ds, EPOCHS=10, BATCH_SIZE=64, lr=1e-3, optim="adam", \
+    train_yolo(train_ds, val_ds, EPOCHS=75, BATCH_SIZE=64, lr=1e-2, optim="sgd", \
         save_path="model/yolo.h5", finetune=False)
