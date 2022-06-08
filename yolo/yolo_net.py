@@ -1,11 +1,12 @@
 import tensorflow as tf
-from keras.layers import Conv2D, Dense, Reshape, GlobalAveragePooling2D, Flatten, Dropout, LeakyReLU, MaxPooling2D
+from keras.layers import Input, Conv2D, Concatenate
+from keras import Model
 
 
 from data_gen import *
 
 base_model = tf.keras.applications.MobileNet(
-    alpha = 0.5,
+    alpha = 1.0,
     input_shape=(224, 224, 3),
     weights="imagenet",
     include_top=False
@@ -13,61 +14,24 @@ base_model = tf.keras.applications.MobileNet(
 
 base_model.trainable=False
 
-# def yolo_net(input):
+def yolo_net(input, bbox_num=2, class_num=20):
+    # backbone
+    gray2rgb = Conv2D(3, kernel_size=1, strides=1, activation=None, name="gray2rgb")(input)
+    x = base_model(gray2rgb, training=False)
 
-#     gray2rgb = Conv2D(3, kernel_size=1, strides=1, activation=None)(input)
-#     x = base_model(gray2rgb, training=False)
+    # yolo_head
+    conf = Conv2D(1*bbox_num, 1, padding="same", kernel_initializer='he_normal', activation="sigmoid")(x)
+    bbox = Conv2D(4*bbox_num, 1, padding="same", kernel_initializer='he_normal', activation="sigmoid")(x)
+    prob = Conv2D(class_num, 1, padding="same", kernel_initializer='he_normal', activation="softmax")(x)
 
-#     x = GlobalAveragePooling2D()(x)
-#     x = Dense(S*S*(5+C), activation="sigmoid")(x)
-#     x = Reshape(target_shape=(S, S, 5+C))(x)
-
-#     return x
-
-def conv(input, filters, kernel_size, strides=1, padding="same"):
-    x = Conv2D(filters, kernel_size, strides, padding)(input)
-    x = LeakyReLU(alpha=0.1)(x)
-    return x
+    output = Concatenate(axis=-1)([conf, bbox, prob])
+    return output
 
 
-def yolo_net(input):
+if __name__ == '__main__':
 
-    gray2rgb = Conv2D(3, kernel_size=1, strides=1, activation=None)(input)
-
-    x = conv(gray2rgb, 64, 7, 2)
-    x = MaxPooling2D(2, 2)(x)
-
-    x = conv(x, 192, 3)
-    x = MaxPooling2D(2, 2)(x)
-
-    x = conv(x, 128, 1)
-    x = conv(x, 256, 3)
-    x = conv(x, 256, 1)
-    x = conv(x, 512, 3)
-    x = MaxPooling2D(2, 2)(x)
-
-    for i in range(4):
-        x = conv(x, 256, 1)
-        x = conv(x, 512, 3)
-    x = conv(x, 512, 1)
-    x = conv(x, 1024, 3)
-    x = MaxPooling2D(2, 2)(x)
-
-    for i in range(2):
-        x = conv(x, 512, 1)
-        x = conv(x, 1024, 3)
-    x = conv(x, 1024, 3)
-    x = conv(x, 1024, 3, 2)
-
-    x = conv(x, 1024, 3)
-    x = conv(x, 1024, 3)
-
-    x = conv(x, 256, 3)
-    x = Flatten()(x)
-    x = Dropout(0.5)(x)
-    x = Dense(S*S*(5+C))(x)
-    x = Reshape(target_shape=(S, S, 5+C))(x)
-    return x
-
-
+    input = Input(shape=(224, 224, 1))
+    output = yolo_net(input)
+    model = Model(input, output)
+    model.summary()
 
