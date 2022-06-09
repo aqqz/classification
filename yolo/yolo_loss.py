@@ -1,112 +1,128 @@
-from turtle import pos
+from tkinter import Y
 import tensorflow as tf
 from data_gen import *
 
-lambda_coord = 5
-lambda_noobj = 0.5
-eps = 1e-7
+l_coord = 5
+l_noobj = 0.5
+eps = 1e-10
 
-def compute_iou(gtbox, pdbox):
+# 损失函数和loss计算部分参考：
+#  https://github.com/TowardsNorth/yolo_v1_tensorflow_guiyu/blob/991acae222a1754974c28df613bf3e2f7a45a3f2/yolo/yolo_net.py
+def compute_iou(boxes1, boxes2):
+    boxes1_t = tf.stack(
+        [
+            boxes1[..., 0] - boxes1[..., 2] / 2.0,
+            boxes1[..., 1] - boxes1[..., 3] / 2.0,
+            boxes1[..., 0] + boxes1[..., 2] / 2.0,
+            boxes1[..., 1] + boxes1[..., 3] / 2.0,
+        ], axis=-1
+    )
 
-    # 获取标签和网络预测的中心坐标和预测框宽高
-    normal_x = gtbox[..., 0]
-    normal_y = gtbox[..., 1]
-    normal_w = gtbox[..., 2]
-    normal_h = gtbox[..., 3]
-    _normal_x = pdbox[..., 0]
-    _normal_y = pdbox[..., 1]
-    _normal_w = pdbox[..., 2]
-    _normal_h = pdbox[..., 3]
+    boxes2_t = tf.stack(
+        [
+            boxes2[..., 0] - boxes2[..., 2] / 2.0,
+            boxes2[..., 1] - boxes2[..., 3] / 2.0,
+            boxes2[..., 0] + boxes2[..., 2] / 2.0,
+            boxes2[..., 1] + boxes2[..., 3] / 2.0,
+        ], axis=-1
+    )
+    
+    lu = tf.maximum(boxes1_t[..., :2], boxes2_t[..., :2])
+    rd = tf.minimum(boxes1_t[..., 2:], boxes2_t[..., 2:])
 
-    # 计算偏移矩阵
-    B = pdbox.shape[0]
-    offset_x = np.array([np.array([[i for i in range(S)]*S]).reshape(S, S)]*B).astype("float32") #(?, S, S)
-    offset_x = tf.convert_to_tensor(offset_x)
-    offset_y = np.array([np.array([[i for i in range(S)]*S]).reshape(S, S).transpose()]*B).astype("float32") #(?, S, S)
-    offset_y = tf.convert_to_tensor(offset_y)
+    intersection = tf.maximum(rd-lu, 0)
+    inter_square = intersection[..., 0]*intersection[..., 1]
+    square1 = boxes1[..., 2]*boxes1[..., 3]
+    square2 = boxes2[..., 2]*boxes2[..., 3]
 
-    # 计算预测和真值坐标
-    x = (normal_x+offset_x)*grid_size
-    y = (normal_y+offset_y)*grid_size
-    w = normal_w*img_size
-    h = normal_h*img_size
-    _x = (_normal_x+offset_x)*grid_size
-    _y = (_normal_y+offset_y)*grid_size
-    _w = _normal_w*img_size
-    _h = _normal_h*img_size
-
-    # 还原真值和预测坐标
-    xmin = x - w/2
-    ymin = y - h/2
-    xmax = x + w/2
-    ymax = y + h/2
-    _xmin = _x - _w/2
-    _ymin = _y - _h/2
-    _xmax = _x + _w/2
-    _ymax = _y + _h/2
-
-    # 计算交集框面积
-    x_LU = tf.maximum(xmin, _xmin)
-    y_LU = tf.maximum(ymin, _ymin)
-    x_RD = tf.minimum(xmax, _xmax)
-    y_RD = tf.minimum(ymax, _ymax)
-
-    inner_w = tf.maximum(x_RD-x_LU, 0)
-    inner_h = tf.maximum(y_RD-y_LU, 0)
-    S_inner = inner_w*inner_h
-
-    # 计算batch IOU
-    S_label = (xmax-xmin)*(ymax-ymin)
-    S_pred = (_xmax-_xmin)*(_ymax-_ymin)
-    ious = S_inner / (S_label+S_pred-S_inner+eps)
-
-    return ious
-
+    union_square = tf.maximum(square1+square2-inter_square, eps)
+    return tf.clip_by_value(inter_square/union_square, 0.0, 1.0)
 
 
 
 def yolo_loss(y_true, y_pred):
 
-    # 获取标签和预测
-    c = y_true[..., 0] # (?, S, S)
-    _c = y_pred[..., 0] #(?, S, S)
-    xywh = y_true[..., 1:5] #(?, S, S, 4)
-    _xywh = y_pred[..., 1:5] #(?, S, S, 4)
-    p = y_true[..., 5:] #(?, S, S, 20)
-    _p = y_pred[..., 5:] #(?, S, S, 20)
+    batch = y_pred.shape[0]
+
+    pred_confidence = tf.reshape(tf.stack([y_pred[..., 0], y_pred[..., 5]], axis=-1), [batch, S, S, B])
+    pred_boxes = tf.reshape(tf.stack(
+        [
+            y_pred[..., 1],
+            y_pred[..., 2],
+            tf.sqrt(y_pred[..., 3] + eps),
+            tf.sqrt(y_pred[..., 4] + eps),
+            y_pred[..., 6],
+            y_pred[..., 7],
+            tf.sqrt(y_pred[..., 8] + eps),
+            tf.sqrt(y_pred[..., 9] + eps), 
+        ], axis=-1), [batch, S, S, B, 4])
+    pred_classes = tf.reshape(y_pred[..., 10:], [batch, S, S, C])
+
+    response = tf.reshape(y_true[..., 0], [batch, S, S, 1])
+    boxes = tf.reshape(tf.stack(
+        [
+            y_true[..., 1],
+            y_true[..., 2],
+            tf.sqrt(y_true[..., 3] + eps),
+            tf.sqrt(y_true[..., 4] + eps),
+        ], axis=-1), [batch, S, S, 1, 4])
+    boxes = tf.tile(boxes, [1, 1, 1, B, 1])
+    classes = tf.reshape(y_true[..., 5:], [batch, S, S, C])
+
+    offset = np.transpose(np.reshape(np.array([np.arange(S)]*S*B), (B, S, S)), (1, 2, 0))
+    offset = tf.reshape(tf.constant(offset, dtype=tf.float32), [1, S, S, B])
+    offset = tf.tile(offset, [batch, 1, 1, 1])
+    offset_tran = tf.transpose(offset, (0, 2, 1, 3))
+
+    predict_boxes_tran = tf.stack(
+        [
+            (pred_boxes[..., 0] + offset) / S,
+            (pred_boxes[..., 1] + offset_tran) / S, 
+            tf.square(pred_boxes[..., 2]),
+            tf.square(pred_boxes[..., 3])
+        ], axis=-1
+    )
+    boxes_tran = tf.stack(
+        [
+            (boxes[..., 0] + offset) / S, 
+            (boxes[..., 1] + offset_tran) / S,
+            tf.square(boxes[..., 2]),
+            tf.square(boxes[..., 3])
+        ], axis=-1
+    )
+    iou_score = compute_iou(boxes_tran, predict_boxes_tran) #(?, S, S, B)
+
+    object_mask = tf.reduce_max(iou_score, 3, keepdims=True)
+    object_mask = tf.cast((iou_score>=object_mask), tf.float32)*response
+
+    noobject_mask = tf.ones_like(object_mask, dtype=tf.float32) - object_mask
     
-    # 计算gtbox和pdbox的iou
-    iou_score = compute_iou(xywh, _xywh) #(?, S, S)
-    response_mask = tf.ones_like(iou_score) #(?, S, S)
-    obj_mask = c #(?, S, S)
-    noobj_mask = 1-c*response_mask #(?, S, S)
+    # 类别损失
+    class_delta = response*(pred_classes-classes)
+    class_loss = tf.reduce_mean(
+        tf.reduce_sum(tf.square(class_delta), axis=[1, 2, 3])
+    )
 
-    # 损失计算
-    loc_loss = obj_mask*response_mask*(tf.square(xywh[..., 0]-_xywh[..., 0])+tf.square(xywh[..., 1]-_xywh[..., 1])) #(?, S, S)
-    loc_loss = tf.reduce_mean(tf.reduce_sum(loc_loss, axis=[1, 2]))
-    # tf.print(loc_loss)
+    # 有目标的损失
+    object_delta = object_mask*(pred_confidence-iou_score)
+    object_loss = tf.reduce_mean(
+        tf.reduce_sum(tf.square(object_delta), axis=[1, 2, 3])
+    )
 
-    scale_loss = obj_mask*response_mask*(
-        tf.square(tf.sqrt(xywh[..., 2]+eps)-tf.sqrt(_xywh[..., 2]+eps)) + \
-        tf.square(tf.sqrt(xywh[..., 3]+eps)-tf.sqrt(_xywh[..., 3]+eps))
-        ) #(?, S, S)
-    scale_loss = tf.reduce_mean(tf.reduce_sum(scale_loss, axis=[1, 2]))
-    # tf.print(scale_loss)
+    # 没有目标的损失
+    noobject_delta = noobject_mask*(pred_confidence-0)
+    noobject_loss = tf.reduce_mean(
+        tf.reduce_sum(tf.square(noobject_delta), axis=[1, 2, 3])
+    )
 
-    positive_loss = obj_mask*response_mask*tf.square(iou_score-_c) #(?, S, S)
-    positive_loss = tf.reduce_mean(tf.reduce_sum(positive_loss, axis=[1, 2]))
-    # tf.print(positive_loss)
+    # 定位损失
+    coord_mask = tf.expand_dims(object_mask, 4)
+    coord_delta = coord_mask*(pred_boxes-boxes)
+    coord_loss = tf.reduce_mean(
+        tf.reduce_sum(tf.square(coord_delta), axis=[1, 2, 3, 4])
+    )
 
-    negative_loss = noobj_mask*tf.square(0-_c)
-    negative_loss = tf.reduce_mean(tf.reduce_sum(negative_loss, axis=[1, 2]))
-    # tf.print(negative_loss)
 
-    probility_loss = obj_mask*tf.reduce_sum(-p*tf.math.log(_p), axis=3) #(?, S, S)
-    probility_loss = tf.reduce_mean(tf.reduce_sum(probility_loss, axis=[1, 2]))
-    # tf.print(probility_loss)
+    total_loss = l_coord*coord_loss + object_loss + l_noobj*noobject_loss + class_loss
 
-    total_loss = lambda_coord * loc_loss + lambda_coord * scale_loss + \
-                positive_loss + lambda_noobj * negative_loss + probility_loss
-
-    # tf.print(total_loss)
     return total_loss

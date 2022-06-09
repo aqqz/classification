@@ -6,6 +6,7 @@ import numpy as np
 
 
 S = 7
+B = 2
 C = 20
 img_size = 224
 grid_size = img_size // S
