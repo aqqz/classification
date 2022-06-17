@@ -94,7 +94,8 @@ def save_samples(x_test, y_test, len, mode='gray'):
     if os.path.exists('samples') == False:
         os.mkdir('samples')
     for i in x_quant:
-        image.save_img('samples/' + str(count) + '_' + str(y_quant[count]) + '.pgm', i, mode=mode)
+        label = np.argmax(y_quant[count])
+        image.save_img('samples/' + str(count) + '_' + str(label) + '.pgm', i, mode=mode)
         count += 1
 
     print("saved samples in samples/")
