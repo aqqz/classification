@@ -1,6 +1,6 @@
 import tensorflow as tf
 from keras.layers import Conv2D, MaxPooling2D, Flatten, Dense, \
-    BatchNormalization, ReLU, Concatenate, Dropout, AveragePooling2D
+    BatchNormalization, ReLU, AveragePooling2D
 
 def ResidualBlock(input, filters, strides=1):
     x = Conv2D(filters, (3, 3), padding="same", strides=strides)(input)

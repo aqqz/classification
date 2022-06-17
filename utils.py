@@ -7,20 +7,30 @@ import cv2
         
 
 def load_image(image_path):
+    """
+    TensorFlow读取数据，返回image_tensor [0, 1]
+    """
     raw = tf.io.read_file(image_path)
     img = tf.io.decode_jpeg(raw, channels=1)
     img = tf.image.resize(img, [224, 224])
     img = tf.cast(img, tf.float32)    
     img = img / 255
-
     return img
 
 
 def to_one_hot(image_label, class_names):
+    """
+    标签转one-hot编码
+    0 -> [1, 0]
+    1 -> [0, 1]
+    """
     return tf.one_hot(image_label, len(class_names))
 
 
 def genearte_image_list(data_root, class_names):
+    """
+    从分类好的数据根目录生成图片路径列表，图片标签列表
+    """
     class_dirs = [os.path.join(data_root, class_name) for class_name in class_names]
     
     image_paths = []
@@ -63,6 +73,9 @@ def load_data(image_paths, image_labels):
 
 
 def generate_split_dataset(image_paths, image_labels, class_names, split_rate=0.8):
+    """
+    输入图片路径列表和图片标签列表，根据训练验证比例，划分数据集，返回训练集、验证集
+    """
     image_dataset = tf.data.Dataset.from_tensor_slices(image_paths).map(load_image)
     label_dataset = tf.data.Dataset.from_tensor_slices(image_labels).map(
         lambda x: to_one_hot(x, class_names))
@@ -84,6 +97,9 @@ def generate_split_dataset(image_paths, image_labels, class_names, split_rate=0.
 
 
 def draw_box(img_path, ob_infos):
+    """
+    输入图片路径和坐标框信息，绘制bounding box
+    """
     img = cv2.imread(img_path)
     cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
     for ob_info in ob_infos:

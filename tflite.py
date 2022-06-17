@@ -1,6 +1,4 @@
 import tensorflow as tf
-from voc.voc_datagen import *
-from utils import load_data
 import numpy as np
 import time
 import os
@@ -9,12 +7,17 @@ from keras.preprocessing.image import image
 os.environ["CUDA_VISIBLE_DEVICES"] = "-1"
 
 def representative_data_gen():
+    """
+    选择表征数据集
+    """
     for input_value in tf.data.Dataset.from_tensor_slices(test_images).batch(1).take(100):
         # Model has only one input so each data point has one element.
         yield [input_value]
 
 def lite_convert(model_path, quantization="none", save_path="model/model.tflite"):
-
+    """
+    h5 -> tflite
+    """
     model = tf.keras.models.load_model(model_path)
     converter = tf.lite.TFLiteConverter.from_keras_model(model)
     if quantization=='int8':
@@ -33,6 +36,9 @@ def lite_convert(model_path, quantization="none", save_path="model/model.tflite"
 
 
 def evaluate_tflite(model_path, test_images, test_labels):
+    """
+    在测试数据集上评估tflite模型的精度
+    """
     print("evaluating tflite model...\n")
     start = time.time()
     # 创建解释器
@@ -75,7 +81,11 @@ def evaluate_tflite(model_path, test_images, test_labels):
     count = 0
     accuracy.reset_states()
 
+
 def save_samples(x_test, y_test, len, mode='gray'):
+    """
+    保存指定数量的测试样本
+    """
     print(f"generate {len} samples for quantize.")
     x_quant = x_test[:len]
     y_quant = y_test[:len]
@@ -91,23 +101,12 @@ def save_samples(x_test, y_test, len, mode='gray'):
 
 if __name__ == '__main__':
 
-    test_img_paths, test_img_labels = generate_image_list(cls="person", \
-        voc_label_path=voc_label_path, voc_image_path=voc_image_path, mode="val")
+
     
     test_images, test_labels = load_data(test_img_paths, test_img_labels)
 
-    lite_convert('model/voc.h5', quantization="int8", save_path="model/voc_q.tflite")
+    lite_convert('model/model.h5', quantization="int8", save_path="model/model.tflite")
 
     save_samples(test_images, test_labels, len=100, mode="gray")
     
-    evaluate_tflite(model_path="model/voc_q.tflite", test_images=test_images, test_labels=test_labels)
-
-    
-
-    
-
-    
-    
-
-    
-    
+    evaluate_tflite(model_path="model/model.tflite", test_images=test_images, test_labels=test_labels)

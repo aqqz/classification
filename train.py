@@ -7,8 +7,11 @@ from model import net
 
 os.environ["CUDA_VISIBLE_DEVICES"] = "0"
 
-def train(train_ds, val_ds, EPOCHS, BATCH_SIZE=32, lr=0.01, save_path='model/model.h5'):
-    
+def train(train_ds, val_ds, EPOCHS, BATCH_SIZE=32, optim="sgd", lr=0.01):
+    """
+    TensorFlow自定义训练
+    """
+    # 准备数据
     train_ds = train_ds.shuffle(train_ds.cardinality().numpy()).batch(BATCH_SIZE)
     val_ds = val_ds.batch(BATCH_SIZE)
 
@@ -20,9 +23,12 @@ def train(train_ds, val_ds, EPOCHS, BATCH_SIZE=32, lr=0.01, save_path='model/mod
     model = tf.keras.Model(input, output)
     model.summary()
     
-    # 训练配置
-    optimizer = tf.keras.optimizers.SGD(learning_rate=lr)
-    
+    # 配置优化器，学习率
+    if optim=="sgd":
+        optimizer = tf.keras.optimizers.SGD(learning_rate=lr)
+    if optim=="adam":
+        optimizer = tf.keras.optimizers.Adam(learning_rate=lr)
+
     # 记录指标
     train_loss = tf.keras.metrics.Mean(name="train_loss")
     train_accuracy = tf.keras.metrics.Accuracy(name="train_acc")
@@ -39,7 +45,7 @@ def train(train_ds, val_ds, EPOCHS, BATCH_SIZE=32, lr=0.01, save_path='model/mod
     @tf.function
     def train_step(images, labels):
         with tf.GradientTape() as tape:
-            logits = model(images)
+            logits = model(images, training=True)
             loss_value = cls_loss(labels, logits)
         gradients = tape.gradient(loss_value, model.trainable_variables)
         optimizer.apply_gradients(zip(gradients, model.trainable_variables))
@@ -49,7 +55,7 @@ def train(train_ds, val_ds, EPOCHS, BATCH_SIZE=32, lr=0.01, save_path='model/mod
     # 验证阶段
     @tf.function
     def val_step(images, labels):
-        logits = model(images)
+        logits = model(images, training=False)
         loss_value = cls_loss(labels, logits)
         val_loss(loss_value)
         val_accuracy(tf.argmax(labels,axis=1), tf.argmax(logits, axis=1))
@@ -86,8 +92,8 @@ def train(train_ds, val_ds, EPOCHS, BATCH_SIZE=32, lr=0.01, save_path='model/mod
             'Val Accuracy: ' + pattern.format(val_accuracy.result())
         )
         
-    
-    model.save(save_path)
+    # 保存模型
+    model.save("model/model.h5")
 
 
 
@@ -103,6 +109,4 @@ if __name__ == '__main__':
 
     train_ds, val_ds = generate_split_dataset(image_paths, image_labels, class_names, split_rate=0.8)
 
-    train(train_ds, val_ds, EPOCHS=50, BATCH_SIZE=32, lr=0.01, save_path='model/model.h5')
-
-    
+    train(train_ds, val_ds, EPOCHS=50, BATCH_SIZE=32, optim="sgd", lr=0.01)    

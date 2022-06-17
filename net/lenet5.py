@@ -1,5 +1,5 @@
 import tensorflow as tf
-from keras.layers import Conv2D, MaxPooling2D, Flatten, Dense, BatchNormalization, ReLU
+from keras.layers import Conv2D, MaxPooling2D, Flatten, Dense, ReLU
 
 def lenet5(input, num_classes):
 
