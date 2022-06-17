@@ -54,21 +54,21 @@ def genearte_image_list(data_root, class_names):
     return image_paths, image_labels
 
 
-def load_data(image_paths, image_labels):
-    test_images = []
-    test_labels = []
-    print("loading data...\n")
+def load_data(datasets):
+    """
+    输入TensorFlow Dataset, 返回Numpy ndarray类型图像和标签
+    """
+    images = []
+    labels = []
+    print("loading data from datasets...\n")
     
-    for path in image_paths:
-        test_images.append(load_image(path))
+    for step, (image, label) in enumerate(datasets):
+        images.append(image)
+        labels.append(label)
+    images = np.array(images)
+    labels = np.array(labels)
 
-    for label in image_labels:
-        test_labels.append(label)
-
-    test_images = np.array(test_images)
-    test_labels = np.array(test_labels)
-
-    return test_images, test_labels
+    return images, labels
 
 
 

@@ -3,6 +3,7 @@ import numpy as np
 import time
 import os
 from keras.preprocessing.image import image
+from utils import load_data, genearte_image_list, generate_split_dataset
 
 os.environ["CUDA_VISIBLE_DEVICES"] = "-1"
 
@@ -101,9 +102,13 @@ def save_samples(x_test, y_test, len, mode='gray'):
 
 if __name__ == '__main__':
 
+    data_root = '/home/taozhi/datasets/flowers' # 训练数据根目录
+    class_names = os.listdir(data_root)
 
+    image_paths, image_labels = genearte_image_list(data_root, class_names)
+    train_ds, val_ds = generate_split_dataset(image_paths, image_labels, class_names, split_rate=0.8)
     
-    test_images, test_labels = load_data(test_img_paths, test_img_labels)
+    test_images, test_labels = load_data(val_ds) #导入验证集数据
 
     lite_convert('model/model.h5', quantization="int8", save_path="model/model.tflite")
 
