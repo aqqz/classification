@@ -37,8 +37,13 @@ def predict_tflite(img_path):
     input = np.expand_dims(img, axis=0).astype(input_details["dtype"])
     model.set_tensor(input_details['index'], input)
     model.invoke()
-    output_data = model.get_tensor(output_details['index'])
-    print(output_data)
+    output_data = model.get_tensor(output_details['index'])[0]
+    # print(output_data)
+
+    if output_details["dtype"] == np.uint8:
+        output_scale, output_zero_point = output_details["quantization"]
+        output_data = (output_data - output_zero_point) * output_scale
+    print(output_data)    
 
 
 
@@ -46,7 +51,7 @@ if __name__ == '__main__':
     
     data_root = '/home/taozhi/datasets/flowers' # 训练数据根目录
     class_names = os.listdir(data_root)
-    test_image = '/home/taozhi/datasets/flowers/tulip/10791227_7168491604.jpg'
+    test_image = '/home/taozhi/datasets/flowers/rose/12240303_80d87f77a3_n.jpg'
     
     # 测试h5模型
     predict(test_image, class_names)
