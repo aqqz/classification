@@ -2,7 +2,7 @@ import tensorflow as tf
 import numpy as np
 import time
 import os
-from keras.preprocessing.image import image
+from keras.utils import save_img
 from utils import load_data, genearte_image_list, generate_split_dataset
 
 os.environ["CUDA_VISIBLE_DEVICES"] = "-1"
@@ -11,7 +11,7 @@ def representative_data_gen():
     """
     选择表征数据集
     """
-    for input_value in tf.data.Dataset.from_tensor_slices(test_images).batch(1).take(100):
+    for input_value in tf.data.Dataset.from_tensor_slices(test_images).batch(1).take(50):
         # Model has only one input so each data point has one element.
         yield [input_value]
 
@@ -95,7 +95,7 @@ def save_samples(x_test, y_test, len, mode='gray'):
         os.mkdir('samples')
     for i in x_quant:
         label = np.argmax(y_quant[count])
-        image.save_img('samples/' + str(count) + '_' + str(label) + '.pgm', i, mode=mode)
+        save_img('samples/' + str(count) + '_' + str(label) + '.pgm', i, mode=mode)
         count += 1
 
     print("saved samples in samples/")
@@ -103,16 +103,16 @@ def save_samples(x_test, y_test, len, mode='gray'):
 
 if __name__ == '__main__':
 
-    data_root = '/home/taozhi/datasets/flowers' # 训练数据根目录
+    data_root = '/home/taozhi/datasets/ds' # 训练数据根目录
     class_names = os.listdir(data_root)
 
     image_paths, image_labels = genearte_image_list(data_root, class_names)
-    train_ds, val_ds = generate_split_dataset(image_paths, image_labels, class_names, split_rate=0.8)
+    train_ds, val_ds = generate_split_dataset(image_paths, image_labels, class_names, split_rate=0.7)
     
     test_images, test_labels = load_data(val_ds) #导入验证集数据
 
     lite_convert('model/model.h5', quantization="int8", save_path="model/model.tflite")
 
-    save_samples(test_images, test_labels, len=100, mode="gray")
+    save_samples(test_images, test_labels, len=50, mode="gray")
     
     evaluate_tflite(model_path="model/model.tflite", test_images=test_images, test_labels=test_labels)

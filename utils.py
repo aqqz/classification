@@ -12,7 +12,9 @@ def load_image(image_path):
     """
     raw = tf.io.read_file(image_path)
     img = tf.io.decode_jpeg(raw, channels=1)
-    img = tf.image.resize(img, [224, 224])
+    # img = tf.image.resize(img, [224, 224])
+    # 中心裁剪而不是缩放
+    img = tf.image.crop_to_bounding_box(img, 10, 50, 224, 224)
     img = tf.cast(img, tf.float32)    
     img = img / 255
     return img
@@ -39,7 +41,7 @@ def genearte_image_list(data_root, class_names):
         files = os.listdir(class_dir)
         for file in files:
             # 过滤不是.jpg后缀文件
-            if file.endswith('.jpg'):
+            if file.endswith('.jpeg'):
                 image_path = os.path.join(class_dir, file)
                 image_label = class_names.index(class_dir[len(data_root)+1:])
                 image_paths.append(image_path)

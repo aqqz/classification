@@ -4,6 +4,7 @@ import os
 from utils import *
 from loss import *
 from model import net
+from net.lenet5 import lenet5
 
 os.environ["CUDA_VISIBLE_DEVICES"] = "0"
 
@@ -19,7 +20,7 @@ def train(train_ds, val_ds, EPOCHS, BATCH_SIZE=32, optim="sgd", lr=0.01):
 
     # 构建模型
     input = tf.keras.layers.Input(shape=(224, 224, 1))
-    output = net(input, num_classes)
+    output = lenet5(input, num_classes)
     model = tf.keras.Model(input, output)
     model.summary()
     
@@ -100,13 +101,13 @@ def train(train_ds, val_ds, EPOCHS, BATCH_SIZE=32, optim="sgd", lr=0.01):
 
 if __name__ == '__main__':
 
-    data_root = '/home/taozhi/datasets/flowers' # 训练数据根目录
+    data_root = '/home/taozhi/datasets/ds' # 训练数据根目录
     print(data_root)
     class_names = os.listdir(data_root)
     print(class_names)
 
     image_paths, image_labels = genearte_image_list(data_root, class_names)
 
-    train_ds, val_ds = generate_split_dataset(image_paths, image_labels, class_names, split_rate=0.8)
+    train_ds, val_ds = generate_split_dataset(image_paths, image_labels, class_names, split_rate=0.7)
 
     train(train_ds, val_ds, EPOCHS=50, BATCH_SIZE=32, optim="sgd", lr=0.01)    

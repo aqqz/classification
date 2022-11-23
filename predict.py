@@ -3,7 +3,7 @@ from utils import load_image
 import os
 import numpy as np
 
-os.environ["CUDA_VISIBLE_DEVICES"] = "-1"
+os.environ["CUDA_VISIBLE_DEVICES"] = "0"
 
 
 def predict(img_path, class_names):
@@ -28,6 +28,8 @@ def predict_tflite(img_path):
 
     input_details = model.get_input_details()[0]
     output_details = model.get_output_details()[0]
+    
+    tf.print(output_details)
 
     img = load_image(img_path)
     if input_details["dtype"] == np.uint8:
@@ -49,12 +51,12 @@ def predict_tflite(img_path):
 
 if __name__ == '__main__':
     
-    data_root = '/home/taozhi/datasets/flowers' # 训练数据根目录
+    data_root = '/home/taozhi/datasets/ds' # 训练数据根目录
     class_names = os.listdir(data_root)
-    test_image = '/home/taozhi/datasets/flowers/rose/12240303_80d87f77a3_n.jpg'
+    test_image = '/home/taozhi/datasets/ds/room/img_1.jpeg'
     
     # 测试h5模型
     predict(test_image, class_names)
 
     # 测试tflite模型
-    predict_tflite(test_image)
+    # predict_tflite(test_image)
